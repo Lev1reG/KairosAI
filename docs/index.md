@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Welcome
+title: KairosAI
 ---
 
 # Akadasha - Proyek Senior TIF 2025 DTETI FT UGM

@@ -7,8 +7,8 @@ title: KairosAI
 
 ## Anggota Kelompok
 
--
 - Muhammad Hifzhon Harundoyo - 22/498269/TK/54647
+- Diah Ayu Rahmawati - 22/499722/TK/54760
 - Deren Tanaphan - 22/503261/TK/54976
 
 ## Nama Produk

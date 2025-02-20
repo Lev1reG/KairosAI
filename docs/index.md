@@ -14,5 +14,6 @@ title: KairosAI
 ## Modul
 
 - [Modul 1](modul1.md)
+- [Modul 2](modul2.md)
 
 # Departemen Teknik Elektro dan Teknologi Informasi, Fakultas Teknik, Universitas Gadjah Mada

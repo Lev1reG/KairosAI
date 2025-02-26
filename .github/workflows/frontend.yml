@@ -1,4 +1,4 @@
-name: CI Frontend Pipeline
+name: Test & Build Frontend
 
 on:
   push:

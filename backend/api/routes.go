@@ -13,7 +13,9 @@ func SetupRoutes() *chi.Mux {
   r.Use(middlewares.LoggingMiddleware)
 
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Welcome to KairosAI Backend services!"))
+    if _, err := w.Write([]byte("Welcome to KairosAI Backend Service")); err != nil {
+      http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
 	})
 
 	return r

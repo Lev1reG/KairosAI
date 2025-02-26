@@ -46,5 +46,7 @@ func InitLogger(cfg *config.Config) {
   core := zapcore.NewTee(fileCore, consoleCore)
 
   Log = zap.New(core, zap.AddCaller(), zap.AddStacktrace(zapcore.ErrorLevel))
-  defer Log.Sync()
+  defer func() {
+    _ = Log.Sync()
+  }()
 }

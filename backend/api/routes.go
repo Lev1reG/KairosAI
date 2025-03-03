@@ -7,7 +7,12 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func SetupRoutes() *chi.Mux {
+type Handlers struct {
+  AuthHandler *AuthHandler
+  // Add more handlers here (e.g., UserHandler, ScheduleHandler)
+}
+
+func SetupRoutes(handlers *Handlers) *chi.Mux {
 	r := chi.NewRouter()
 
   r.Use(middlewares.LoggingMiddleware)
@@ -18,5 +23,13 @@ func SetupRoutes() *chi.Mux {
     }
 	})
 
+  r.Mount("/api/auth", authRoutes(handlers.AuthHandler))
+
+	return r
+}
+
+func authRoutes(authHandler *AuthHandler) http.Handler {
+	r := chi.NewRouter()
+	r.Post("/register", authHandler.Register)
 	return r
 }

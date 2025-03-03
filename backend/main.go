@@ -23,6 +23,13 @@ func main() {
 	}
 	defer database.Close()
 
+  err = db.RunMigrations(cfg)
+  if err != nil {
+    logger.Log.Fatal("Migration failed", zap.Error(err))
+    return
+  }
+  logger.Log.Info("Migrations applied successfully")
+
   r := api.SetupRoutes()
 
 	port := cfg.PORT

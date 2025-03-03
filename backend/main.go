@@ -6,6 +6,7 @@ import (
 	"github.com/Lev1reG/kairosai-backend/api"
 	"github.com/Lev1reG/kairosai-backend/config"
 	"github.com/Lev1reG/kairosai-backend/db"
+	"github.com/Lev1reG/kairosai-backend/internal/services"
 	"github.com/Lev1reG/kairosai-backend/pkg/logger"
 	"go.uber.org/zap"
 )
@@ -30,7 +31,13 @@ func main() {
   }
   logger.Log.Info("Migrations applied successfully")
 
-  r := api.SetupRoutes()
+  authService := services.NewAuthService(database, cfg.JWT_SECRET)
+
+  handlers := &api.Handlers{
+    AuthHandler: api.NewAuthHandler(authService),
+  }
+
+  r := api.SetupRoutes(handlers)
 
 	port := cfg.PORT
 	logger.Log.Info("Server running", zap.String("port", port))

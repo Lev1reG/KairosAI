@@ -16,6 +16,7 @@ type Config struct {
 	DBPassword string
 	DBName     string
 	DBSSLMode  string
+  JWT_SECRET string
 }
 
 func LoadConfig() *Config {
@@ -33,6 +34,7 @@ func LoadConfig() *Config {
 		DBPassword: getEnv("DB_PASSWORD", "db_password"),
 		DBName:     getEnv("DB_NAME", "db_name"),
 		DBSSLMode:  getEnv("DB_SSL_MODE", "disable"),
+    JWT_SECRET: getEnv("JWT_SECRET", "senpro2025"),
 	}
 }
 

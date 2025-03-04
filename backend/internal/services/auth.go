@@ -9,6 +9,7 @@ import (
 	"github.com/Lev1reG/kairosai-backend/pkg/logger"
 	"github.com/Lev1reG/kairosai-backend/pkg/utils"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
@@ -99,4 +100,23 @@ func (a *AuthService) generateJWT(userID string) (string, error) {
 	}
 
 	return tokenString, nil
+}
+
+func (a *AuthService) GetUserByID(ctx context.Context, userID string) (*db.User, error) {
+	queries := db.New(a.db)
+
+  parsedUUID, err := uuid.Parse(userID)
+  if err != nil {
+    return nil, errors.New("Invalid user id format")
+  }
+
+  pgUUID := pgtype.UUID{Bytes: parsedUUID, Valid: true}
+
+	user, err := queries.GetUserByID(ctx, pgUUID)
+	if err != nil {
+		logger.Log.Error("Error getting user by ID", zap.Error(err))
+		return nil, err
+	}
+
+	return &user, nil
 }

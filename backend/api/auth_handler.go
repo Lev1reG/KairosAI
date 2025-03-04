@@ -4,10 +4,24 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
+	"time"
 
+	"github.com/Lev1reG/kairosai-backend/api/middlewares"
 	"github.com/Lev1reG/kairosai-backend/internal/services"
 	"github.com/Lev1reG/kairosai-backend/pkg/utils"
 )
+
+type UserResponse struct {
+	ID            string    `json:"id"`
+	Name          string    `json:"name"`
+	Username      string    `json:"username"`
+	Email         string    `json:"email"`
+	OAuthProvider string    `json:"oauth_provider"`
+	OAuthID       string    `json:"oauth_id,omitempty"`
+	AvatarURL     string    `json:"avatar_url,omitempty"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
+}
 
 type AuthHandler struct {
 	authService *services.AuthService
@@ -95,4 +109,39 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	utils.SetAuthCookie(w, token)
 
 	utils.SuccessResponse(w, http.StatusOK, "Login successful", map[string]string{"token": token})
+}
+
+func (h *AuthHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
+	// Get user ID from request context
+	userID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok || userID == "" {
+		utils.ErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	user, err := h.authService.GetUserByID(r.Context(), userID)
+	if err != nil {
+		utils.ErrorResponse(w, http.StatusNotFound, "User not found")
+		return
+	}
+
+	userResponse := UserResponse{
+		ID:            user.ID.String(),
+		Name:          user.Name,
+		Username:      user.Username,
+		Email:         user.Email,
+		OAuthProvider: user.OauthProvider.String,
+		OAuthID:       user.OauthID.String,
+		AvatarURL:     user.AvatarUrl.String,
+		CreatedAt:     user.CreatedAt.Time,
+		UpdatedAt:     user.UpdatedAt.Time,
+	}
+
+	utils.SuccessResponse(w, http.StatusOK, "User retrieved successfully", userResponse)
+}
+
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	utils.ClearAuthCookie(w)
+
+	utils.SuccessResponse(w, http.StatusOK, "Logout successful", nil)
 }

@@ -13,6 +13,11 @@ SET oauth_provider = EXCLUDED.oauth_provider,
     updated_at = NOW()
 RETURNING id, name, username, email, avatar_url, created_at, updated_at;
 
+-- name: GetUserByID :one
+SELECT id, name, username, email, password_hash, oauth_provider, oauth_id, avatar_url, created_at, updated_at
+FROM users
+WHERE id = $1;
+
 -- name: GetUserByEmail :one
 SELECT id, name, username, email, password_hash, oauth_provider, oauth_id, avatar_url, created_at, updated_at
 FROM users

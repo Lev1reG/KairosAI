@@ -61,40 +61,42 @@ func (a *AuthService) RegisterUser(ctx context.Context, name, username, email, p
 
 // Login a local user
 func (a *AuthService) LoginUser(ctx context.Context, email, password string) (string, error) {
-  queries := db.New(a.db)
+	queries := db.New(a.db)
 
-  user, err := queries.GetUserByEmail(ctx, email)
-  if err != nil {
-    logger.Log.Error("User not found", zap.Error(err))
-    return "", errors.New("Invalid email or password")
-  }
+	user, err := queries.GetUserByEmail(ctx, email)
+	if err != nil {
+		logger.Log.Error("Database error while retrieving user", zap.Error(err))
+		return "", errors.New("Invalid email or password")
+	}
 
-  if !utils.ComparePassword(user.PasswordHash.String, password) {
-    logger.Log.Error("Invalid credentials")
-    return "", errors.New("Invalid email or password")
-  }
+	if !utils.ComparePassword(user.PasswordHash.String, password) {
+		logger.Log.Warn("Failed login attempt", zap.String("email", email))
+		return "", errors.New("Invalid email or password")
+	}
 
-  tokenString, err := a.generateJWT(user.ID.String())
-  if err != nil {
-    logger.Log.Error("Failed to generate JWT", zap.Error(err))
-    return "", err
-  }
+	tokenString, err := a.generateJWT(user.ID.String())
+	if err != nil {
+		logger.Log.Error("Failed to generate JWT", zap.Error(err))
+		return "", errors.New("Internal server error")
+	}
 
-  return tokenString, nil
+	logger.Log.Info("User logged in successfully", zap.String("user_id", user.ID.String()))
+
+	return tokenString, nil
 }
 
 // Generate JWT Token
 func (a *AuthService) generateJWT(userID string) (string, error) {
-  claims := jwt.MapClaims{
-    "user_id": userID,
-    "exp": time.Now().Add(24 * time.Hour).Unix(),
-  }
+	claims := jwt.MapClaims{
+		"user_id": userID,
+		"exp":     time.Now().Add(24 * time.Hour).Unix(),
+	}
 
-  token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-  tokenString, err := token.SignedString([]byte(a.jwtSecret))
-  if err != nil {
-    return "", err
-  }
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString([]byte(a.jwtSecret))
+	if err != nil {
+		return "", err
+	}
 
-  return tokenString, nil
+	return tokenString, nil
 }

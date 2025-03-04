@@ -31,5 +31,6 @@ func SetupRoutes(handlers *Handlers) *chi.Mux {
 func authRoutes(authHandler *AuthHandler) http.Handler {
 	r := chi.NewRouter()
 	r.Post("/register", authHandler.Register)
+  r.Post("/login", authHandler.Login)
 	return r
 }

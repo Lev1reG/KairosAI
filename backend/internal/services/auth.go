@@ -3,10 +3,12 @@ package services
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/Lev1reG/kairosai-backend/db"
 	"github.com/Lev1reG/kairosai-backend/pkg/logger"
 	"github.com/Lev1reG/kairosai-backend/pkg/utils"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
@@ -55,4 +57,44 @@ func (a *AuthService) RegisterUser(ctx context.Context, name, username, email, p
 
 	logger.Log.Info("User registered", zap.String("user_id", user.ID.String()))
 	return &user, nil
+}
+
+// Login a local user
+func (a *AuthService) LoginUser(ctx context.Context, email, password string) (string, error) {
+  queries := db.New(a.db)
+
+  user, err := queries.GetUserByEmail(ctx, email)
+  if err != nil {
+    logger.Log.Error("User not found", zap.Error(err))
+    return "", errors.New("Invalid email or password")
+  }
+
+  if !utils.ComparePassword(user.PasswordHash.String, password) {
+    logger.Log.Error("Invalid credentials")
+    return "", errors.New("Invalid email or password")
+  }
+
+  tokenString, err := a.generateJWT(user.ID.String())
+  if err != nil {
+    logger.Log.Error("Failed to generate JWT", zap.Error(err))
+    return "", err
+  }
+
+  return tokenString, nil
+}
+
+// Generate JWT Token
+func (a *AuthService) generateJWT(userID string) (string, error) {
+  claims := jwt.MapClaims{
+    "user_id": userID,
+    "exp": time.Now().Add(24 * time.Hour).Unix(),
+  }
+
+  token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+  tokenString, err := token.SignedString([]byte(a.jwtSecret))
+  if err != nil {
+    return "", err
+  }
+
+  return tokenString, nil
 }

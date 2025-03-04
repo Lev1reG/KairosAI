@@ -45,7 +45,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := utils.IsValidPassword(req.Password); err != nil {
-		utils.ErrorResponse(w, http.StatusBadRequest, err.Error()) 
+		utils.ErrorResponse(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -60,4 +60,39 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SuccessResponse(w, http.StatusCreated, "User registered successfully", user)
+}
+
+func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Email    string `json:"email"`
+		Password string `json:"password"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+
+	req.Email = strings.TrimSpace(req.Email)
+	req.Password = strings.TrimSpace(req.Password)
+
+	if req.Email == "" || req.Password == "" {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Email and password are required")
+		return
+	}
+
+	if !utils.IsValidEmail(req.Email) {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Invalid email format")
+		return
+	}
+
+	token, err := h.authService.LoginUser(r.Context(), req.Email, req.Password)
+	if err != nil {
+		utils.ErrorResponse(w, http.StatusUnauthorized, err.Error())
+		return
+	}
+
+	utils.SetAuthCookie(w, token)
+
+	utils.SuccessResponse(w, http.StatusOK, "Login successful", map[string]string{"token": token})
 }

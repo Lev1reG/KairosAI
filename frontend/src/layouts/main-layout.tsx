@@ -5,8 +5,7 @@ const MainLayout = () => {
     <div>
       {/* Navigation */}
       <nav>
-        <Link to="/">Home</Link> |<Link to="/auth/login">Login</Link> |
-        <Link to="/auth/register">Register</Link>
+        <Link to="/">Home</Link> 
       </nav>
 
       {/* Page Content */}

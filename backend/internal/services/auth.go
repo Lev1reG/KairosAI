@@ -3,6 +3,9 @@ package services
 import (
 	"context"
 	"errors"
+	"fmt"
+	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/Lev1reG/kairosai-backend/db"
@@ -105,12 +108,12 @@ func (a *AuthService) generateJWT(userID string) (string, error) {
 func (a *AuthService) GetUserByID(ctx context.Context, userID string) (*db.User, error) {
 	queries := db.New(a.db)
 
-  parsedUUID, err := uuid.Parse(userID)
-  if err != nil {
-    return nil, errors.New("Invalid user id format")
-  }
+	parsedUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, errors.New("Invalid user id format")
+	}
 
-  pgUUID := pgtype.UUID{Bytes: parsedUUID, Valid: true}
+	pgUUID := pgtype.UUID{Bytes: parsedUUID, Valid: true}
 
 	user, err := queries.GetUserByID(ctx, pgUUID)
 	if err != nil {
@@ -119,4 +122,71 @@ func (a *AuthService) GetUserByID(ctx context.Context, userID string) (*db.User,
 	}
 
 	return &user, nil
+}
+
+// OAuth Login
+func (a *AuthService) OAuthLogin(ctx context.Context, provider, code string) (string, error) {
+	queries := db.New(a.db)
+
+	userInfo, err := utils.GetUserInfo(provider, code)
+	if err != nil {
+		return "", err
+	}
+
+	email, name, avatarURL, oauthID, err := utils.ExtractOAuthUserInfo(provider, userInfo)
+
+  logger.Log.Debug("OAuth user info", zap.String("email", email), zap.String("name", name), zap.String("avatar_url", avatarURL), zap.String("oauth_id", oauthID))
+
+	if email == "" || oauthID == "" {
+		return "", errors.New("invalid user data received from OAuth provider")
+	}
+
+	existingUser, err := queries.GetUserByEmail(ctx, email)
+	if err == nil {
+		if existingUser.OauthProvider.String == "local" || existingUser.OauthProvider.String != provider {
+      return "", errors.New("conflict: Email already registered with another provider")
+		}
+
+		return a.generateJWT(existingUser.ID.String())
+	}
+
+	username := generateUniqueUsername(ctx, queries, name)
+
+	user, err := queries.CreateOAuthUser(ctx, db.CreateOAuthUserParams{
+		Name:          name,
+		Username:      username,
+		Email:         email,
+		AvatarUrl:     pgtype.Text{String: avatarURL, Valid: true},
+		OauthProvider: pgtype.Text{String: provider, Valid: true},
+		OauthID:       pgtype.Text{String: oauthID, Valid: true},
+	})
+	if err != nil {
+		logger.Log.Error("Error inserting user", zap.Error(err))
+		return "", err
+	}
+
+	return a.generateJWT(user.ID.String())
+}
+
+func generateUniqueUsername(ctx context.Context, queries *db.Queries, name string) string {
+	baseUsername := sanitizeUsername(name)
+
+	username := baseUsername
+	for {
+		_, err := queries.GetUserByUsername(ctx, username)
+		if err != nil {
+			break
+		}
+		username = fmt.Sprintf("%s_%d", baseUsername, rand.Intn(10000))
+	}
+
+	return username
+}
+
+func sanitizeUsername(name string) string {
+	name = strings.ToLower(name)
+	name = strings.ReplaceAll(name, " ", "")
+	name = strings.ReplaceAll(name, ".", "")
+	name = strings.ReplaceAll(name, "@", "")
+	return name
 }

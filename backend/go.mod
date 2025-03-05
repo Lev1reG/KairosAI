@@ -11,9 +11,11 @@ require (
 	github.com/joho/godotenv v1.5.1
 	go.uber.org/zap v1.27.0
 	golang.org/x/crypto v0.35.0
+	golang.org/x/oauth2 v0.27.0
 )
 
 require (
+	cloud.google.com/go/compute/metadata v0.3.0 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect

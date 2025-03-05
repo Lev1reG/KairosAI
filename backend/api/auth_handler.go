@@ -7,8 +7,13 @@ import (
 	"time"
 
 	"github.com/Lev1reG/kairosai-backend/api/middlewares"
+	"github.com/Lev1reG/kairosai-backend/config"
 	"github.com/Lev1reG/kairosai-backend/internal/services"
+	"github.com/Lev1reG/kairosai-backend/pkg/logger"
 	"github.com/Lev1reG/kairosai-backend/pkg/utils"
+	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
+	"golang.org/x/oauth2"
 )
 
 type UserResponse struct {
@@ -138,6 +143,82 @@ func (h *AuthHandler) GetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	utils.SuccessResponse(w, http.StatusOK, "User retrieved successfully", userResponse)
+}
+
+func (h *AuthHandler) RedirectToOAuthProvider(w http.ResponseWriter, r *http.Request) {
+	provider := chi.URLParam(r, "provider")
+	oauthConfig, err := utils.GetOAuthConfig(provider)
+	if err != nil {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Invalid OAuth provider")
+		return
+	}
+
+	state := utils.GenerateRandomState()
+
+	cfg := config.LoadConfig()
+
+	if cfg.APP_ENV == "development" {
+		http.SetCookie(w, &http.Cookie{
+			Name:     "oauth_state",
+			Value:    state,
+			HttpOnly: true,
+			Secure:   false,
+			SameSite: http.SameSiteLaxMode,
+			Path:     "/",
+			Expires:  time.Now().Add(10 * time.Minute),
+		})
+	} else {
+		http.SetCookie(w, &http.Cookie{
+			Name:     "oauth_state",
+			Value:    state,
+			HttpOnly: true,
+			Secure:   true,
+			SameSite: http.SameSiteNoneMode,
+			Path:     "/",
+			Expires:  time.Now().Add(10 * time.Minute),
+		})
+	}
+
+	authUrl := oauthConfig.AuthCodeURL(state, oauth2.AccessTypeOffline)
+
+	http.Redirect(w, r, authUrl, http.StatusFound)
+}
+
+func (h *AuthHandler) OAuthLogin(w http.ResponseWriter, r *http.Request) {
+	provider := chi.URLParam(r, "provider")
+	code := r.URL.Query().Get("code")
+
+	if provider == "" || code == "" {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Invalid request")
+		return
+	}
+
+	queryState := r.URL.Query().Get("state")
+	if queryState == "" {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Missing OAuth state")
+		return
+	}
+
+	cookie, err := r.Cookie("oauth_state")
+	if err != nil || cookie.Value != queryState {
+		utils.ErrorResponse(w, http.StatusForbidden, "Invalid OAuth state")
+		return
+	}
+
+	token, err := h.authService.OAuthLogin(r.Context(), provider, code)
+	if err != nil {
+		if strings.Contains(err.Error(), "conflict: Email") {
+			logger.Log.Warn("OAuth email conflict", zap.String("error", err.Error()))
+			utils.ErrorResponse(w, http.StatusConflict, "Email already registered with another provider")
+			return
+		}
+		logger.Log.Error("Failed to login with OAuth", zap.Error(err))
+		utils.ErrorResponse(w, http.StatusInternalServerError, "Failed to login with OAuth")
+		return
+	}
+
+	utils.SetAuthCookie(w, token)
+	utils.SuccessResponse(w, http.StatusOK, "Login successful", map[string]string{"token": token})
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {

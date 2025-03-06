@@ -38,6 +38,8 @@ func authRoutes(authHandler *AuthHandler) http.Handler {
 		middlewares.JWTMiddleware(http.HandlerFunc(authHandler.GetCurrentUser)).ServeHTTP(w, r)
 	})
 
+  r.Get("/verify-email", authHandler.VerifyEmail)
+
   r.Route("/oauth", func(r chi.Router) {
     r.Get("/{provider}/login", authHandler.RedirectToOAuthProvider)
     r.Get("/{provider}/callback", authHandler.OAuthLogin)

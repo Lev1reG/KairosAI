@@ -8,8 +8,17 @@ CREATE TABLE users (
     oauth_provider TEXT DEFAULT 'local', -- Values: 'github', 'google', 'local'
     oauth_id TEXT UNIQUE, -- Stores OAuth user ID if applicable
     avatar_url TEXT, -- Stores profile picture from OAuth
+    email_verified BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE TABLE email_verifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    token TEXT NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT now()
 );
 
 -- Create schedules table

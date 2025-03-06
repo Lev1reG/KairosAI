@@ -12,8 +12,8 @@ import (
 )
 
 const createOAuthUser = `-- name: CreateOAuthUser :one
-INSERT INTO users (name, username, email, oauth_provider, oauth_id, avatar_url, created_at, updated_at)
-VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+INSERT INTO users (name, username, email, oauth_provider, oauth_id, avatar_url, created_at, updated_at, email_verified)
+VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW(), TRUE)
 ON CONFLICT (email) DO UPDATE
 SET oauth_provider = EXCLUDED.oauth_provider,
     oauth_id = EXCLUDED.oauth_id,
@@ -105,7 +105,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, name, username, email, password_hash, oauth_provider, oauth_id, avatar_url, created_at, updated_at
+SELECT id, name, username, email, password_hash, oauth_provider, oauth_id, avatar_url, email_verified, created_at, updated_at
 FROM users
 WHERE email = $1
 `
@@ -122,6 +122,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 		&i.OauthProvider,
 		&i.OauthID,
 		&i.AvatarUrl,
+		&i.EmailVerified,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -129,7 +130,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, name, username, email, password_hash, oauth_provider, oauth_id, avatar_url, created_at, updated_at
+SELECT id, name, username, email, password_hash, oauth_provider, oauth_id, avatar_url, email_verified, created_at, updated_at
 FROM users
 WHERE id = $1
 `
@@ -146,6 +147,7 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 		&i.OauthProvider,
 		&i.OauthID,
 		&i.AvatarUrl,
+		&i.EmailVerified,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -193,7 +195,7 @@ func (q *Queries) GetUserByOAuthID(ctx context.Context, arg GetUserByOAuthIDPara
 }
 
 const getUserByUsername = `-- name: GetUserByUsername :one
-SELECT id, name, username, email, password_hash, oauth_provider, oauth_id, avatar_url, created_at, updated_at
+SELECT id, name, username, email, password_hash, oauth_provider, oauth_id, avatar_url, email_verified, created_at, updated_at
 FROM users
 WHERE username = $1
 `
@@ -210,8 +212,44 @@ func (q *Queries) GetUserByUsername(ctx context.Context, username string) (User,
 		&i.OauthProvider,
 		&i.OauthID,
 		&i.AvatarUrl,
+		&i.EmailVerified,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getVerifiedUserByEmail = `-- name: GetVerifiedUserByEmail :one
+SELECT id, name, username, email, password_hash, oauth_provider, oauth_id, avatar_url, email_verified, created_at, updated_at
+FROM users
+WHERE email = $1 AND email_verified = TRUE
+`
+
+func (q *Queries) GetVerifiedUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, getVerifiedUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Username,
+		&i.Email,
+		&i.PasswordHash,
+		&i.OauthProvider,
+		&i.OauthID,
+		&i.AvatarUrl,
+		&i.EmailVerified,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const verifyUserEmail = `-- name: VerifyUserEmail :exec
+UPDATE users SET email_verified = TRUE
+WHERE id = $1
+`
+
+func (q *Queries) VerifyUserEmail(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, verifyUserEmail, id)
+	return err
 }

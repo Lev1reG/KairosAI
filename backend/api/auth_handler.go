@@ -78,7 +78,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.SuccessResponse(w, http.StatusCreated, "User registered successfully", user)
+	utils.SuccessResponse(w, http.StatusCreated, "User registered successfully. Please check your email to verify your account.", user)
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -225,4 +225,24 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	utils.ClearAuthCookie(w)
 
 	utils.SuccessResponse(w, http.StatusOK, "Logout successful", nil)
+}
+
+func (h *AuthHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
+	token := r.URL.Query().Get("token")
+	if token == "" {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Invalid token")
+		return
+	}
+
+  err := h.authService.VerifyEmail(r.Context(), token)
+  if err != nil {
+    if err.Error() == "Invalid verification token" {
+      utils.ErrorResponse(w, http.StatusUnauthorized, err.Error())
+      return
+    }
+    utils.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+    return
+  }
+
+  utils.SuccessResponse(w, http.StatusOK, "Email verified successfully! You can now log in", nil)
 }

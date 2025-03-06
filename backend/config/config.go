@@ -22,6 +22,11 @@ type Config struct {
 	GoogleClientSecret string
 	GithubClientID     string
 	GithubClientSecret string
+  SendGridAPIKey     string
+	SMTPUsername       string
+	SMTPPassword       string
+	SMTPHost           string
+	SMTPPort           string
 }
 
 func LoadConfig() *Config {
@@ -45,6 +50,11 @@ func LoadConfig() *Config {
 		GoogleClientSecret: getEnv("GOOGLE_CLIENT_SECRET", "google_client_secret"),
 		GithubClientID:     getEnv("GITHUB_CLIENT_ID", "github_client_id"),
 		GithubClientSecret: getEnv("GITHUB_CLIENT_SECRET", "github_client_secret"),
+    SendGridAPIKey:     getEnv("SENDGRID_API_KEY", "sendgrid_api_key"),
+		SMTPUsername:       getEnv("SMTP_USERNAME", "smtp_username"),
+		SMTPPassword:       getEnv("SMTP_PASSWORD", "smtp_password"),
+    SMTPHost:           getEnv("SMTP_HOST", "smtp_host"),
+    SMTPPort:           getEnv("SMTP_PORT", "smtp_port"),
 	}
 }
 

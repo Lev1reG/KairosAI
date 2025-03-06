@@ -59,6 +59,27 @@ func (a *AuthService) RegisterUser(ctx context.Context, name, username, email, p
 		return nil, err
 	}
 
+	token, err := utils.GenerateSecureToken()
+	if err != nil {
+		logger.Log.Error("Error generating secure token", zap.Error(err))
+		return nil, err
+	}
+
+	hashedToken := utils.HashToken(token)
+	err = queries.CreateEmailVerificationToken(ctx, db.CreateEmailVerificationTokenParams{
+		UserID: user.ID,
+		Token:  hashedToken,
+	})
+	if err != nil {
+		logger.Log.Error("Error inserting email verification token", zap.Error(err))
+		return nil, errors.New("Failed to create email verification token")
+	}
+
+	if err := SendVerificationEmail(email, token); err != nil {
+		logger.Log.Error("Error sending verification email", zap.Error(err))
+		return nil, errors.New("Failed to send verification email")
+	}
+
 	logger.Log.Info("User registered", zap.String("user_id", user.ID.String()))
 	return &user, nil
 }
@@ -67,7 +88,7 @@ func (a *AuthService) RegisterUser(ctx context.Context, name, username, email, p
 func (a *AuthService) LoginUser(ctx context.Context, email, password string) (string, error) {
 	queries := db.New(a.db)
 
-	user, err := queries.GetUserByEmail(ctx, email)
+	user, err := queries.GetVerifiedUserByEmail(ctx, email)
 	if err != nil {
 		logger.Log.Error("Database error while retrieving user", zap.Error(err))
 		return "", errors.New("Invalid email or password")
@@ -135,7 +156,7 @@ func (a *AuthService) OAuthLogin(ctx context.Context, provider, code string) (st
 
 	email, name, avatarURL, oauthID, err := utils.ExtractOAuthUserInfo(provider, userInfo)
 
-  logger.Log.Debug("OAuth user info", zap.String("email", email), zap.String("name", name), zap.String("avatar_url", avatarURL), zap.String("oauth_id", oauthID))
+	logger.Log.Debug("OAuth user info", zap.String("email", email), zap.String("name", name), zap.String("avatar_url", avatarURL), zap.String("oauth_id", oauthID))
 
 	if email == "" || oauthID == "" {
 		return "", errors.New("invalid user data received from OAuth provider")
@@ -144,7 +165,7 @@ func (a *AuthService) OAuthLogin(ctx context.Context, provider, code string) (st
 	existingUser, err := queries.GetUserByEmail(ctx, email)
 	if err == nil {
 		if existingUser.OauthProvider.String == "local" || existingUser.OauthProvider.String != provider {
-      return "", errors.New("conflict: Email already registered with another provider")
+			return "", errors.New("conflict: Email already registered with another provider")
 		}
 
 		return a.generateJWT(existingUser.ID.String())
@@ -166,6 +187,27 @@ func (a *AuthService) OAuthLogin(ctx context.Context, provider, code string) (st
 	}
 
 	return a.generateJWT(user.ID.String())
+}
+
+func (a *AuthService) VerifyEmail(ctx context.Context, token string) error {
+	queries := db.New(a.db)
+
+	hashedToken := utils.HashToken(token)
+	userID, err := queries.GetUserByVerificationToken(ctx, hashedToken)
+	if err != nil {
+		logger.Log.Error("Error getting user by verification token", zap.Error(err))
+		return errors.New("Invalid verification token")
+	}
+
+	err = queries.VerifyUserEmail(ctx, userID)
+	if err != nil {
+		logger.Log.Error("Error verifying user email", zap.Error(err))
+		return errors.New("Failed to verify email")
+	}
+
+	_ = queries.DeleteEmailVerificationToken(ctx, userID)
+
+	return nil
 }
 
 func generateUniqueUsername(ctx context.Context, queries *db.Queries, name string) string {

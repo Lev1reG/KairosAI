@@ -16,6 +16,14 @@ type ChatLog struct {
 	Timestamp pgtype.Timestamptz `json:"timestamp"`
 }
 
+type EmailVerification struct {
+	ID        pgtype.UUID      `json:"id"`
+	UserID    pgtype.UUID      `json:"user_id"`
+	Token     string           `json:"token"`
+	ExpiresAt pgtype.Timestamp `json:"expires_at"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
+}
+
 type Notification struct {
 	ID         pgtype.UUID        `json:"id"`
 	UserID     pgtype.UUID        `json:"user_id"`
@@ -53,6 +61,7 @@ type User struct {
 	OauthProvider pgtype.Text        `json:"oauth_provider"`
 	OauthID       pgtype.Text        `json:"oauth_id"`
 	AvatarUrl     pgtype.Text        `json:"avatar_url"`
+	EmailVerified pgtype.Bool        `json:"email_verified"`
 	CreatedAt     pgtype.Timestamptz `json:"created_at"`
 	UpdatedAt     pgtype.Timestamptz `json:"updated_at"`
 }

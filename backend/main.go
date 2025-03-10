@@ -8,6 +8,7 @@ import (
 	"github.com/Lev1reG/kairosai-backend/db"
 	"github.com/Lev1reG/kairosai-backend/internal/services"
 	"github.com/Lev1reG/kairosai-backend/pkg/logger"
+	"github.com/Lev1reG/kairosai-backend/pkg/utils"
 	"go.uber.org/zap"
 )
 
@@ -36,6 +37,8 @@ func main() {
   handlers := &api.Handlers{
     AuthHandler: api.NewAuthHandler(authService),
   }
+
+  utils.InitOAuth(cfg)
 
   r := api.SetupRoutes(handlers)
 

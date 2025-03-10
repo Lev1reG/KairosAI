@@ -15,8 +15,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/patrickmn/go-cache"
 	"go.uber.org/zap"
 )
+
+var resendCache = cache.New(10*time.Minute, 15*time.Minute)
 
 type AuthService struct {
 	db        *pgxpool.Pool
@@ -82,6 +85,51 @@ func (a *AuthService) RegisterUser(ctx context.Context, name, username, email, p
 
 	logger.Log.Info("User registered", zap.String("user_id", user.ID.String()))
 	return &user, nil
+}
+
+func (a *AuthService) ResendVerificationEmail(ctx context.Context, email string) error {
+	queries := db.New(a.db)
+
+	if _, found := resendCache.Get(email); found {
+		return ErrTooManyRequest
+	}
+
+	user, err := queries.GetUserByEmail(ctx, email)
+	if err != nil {
+		logger.Log.Error("Error getting user by email", zap.Error(err))
+		return ErrUserNotFound
+	}
+
+	isEmailVerified := user.EmailVerified.Valid && user.EmailVerified.Bool
+
+	if isEmailVerified {
+		return ErrAlreadyVerified
+	}
+
+	token, err := utils.GenerateSecureToken()
+	if err != nil {
+		logger.Log.Error("Error generating secure token", zap.Error(err))
+		return ErrInternalServer
+	}
+
+	hashedToken := utils.HashToken(token)
+	err = queries.CreateEmailVerificationToken(ctx, db.CreateEmailVerificationTokenParams{
+		UserID: user.ID,
+		Token:  hashedToken,
+	})
+	if err != nil {
+		logger.Log.Error("Error inserting email verification token", zap.Error(err))
+		return ErrInternalServer
+	}
+
+	if err := SendVerificationEmail(email, token); err != nil {
+		logger.Log.Error("Error sending verification email", zap.Error(err))
+	  return ErrEmailFailed
+	}
+
+  resendCache.Set(email, true, 5*time.Minute)
+
+  return nil
 }
 
 // Login a local user

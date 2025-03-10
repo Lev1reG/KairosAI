@@ -32,17 +32,18 @@ func authRoutes(authHandler *AuthHandler) http.Handler {
 	r := chi.NewRouter()
 	r.Post("/register", authHandler.Register)
 	r.Post("/login", authHandler.Login)
-  r.Post("/logout", authHandler.Logout)
+	r.Post("/logout", authHandler.Logout)
 
 	r.Get("/me", func(w http.ResponseWriter, r *http.Request) {
 		middlewares.JWTMiddleware(http.HandlerFunc(authHandler.GetCurrentUser)).ServeHTTP(w, r)
 	})
 
-  r.Get("/verify-email", authHandler.VerifyEmail)
+	r.Post("/resend-verification", authHandler.ResendVerificationEmail)
+	r.Get("/verify-email", authHandler.VerifyEmail)
 
-  r.Route("/oauth", func(r chi.Router) {
-    r.Get("/{provider}/login", authHandler.RedirectToOAuthProvider)
-    r.Get("/{provider}/callback", authHandler.OAuthLogin)
-  })
+	r.Route("/oauth", func(r chi.Router) {
+		r.Get("/{provider}/login", authHandler.RedirectToOAuthProvider)
+		r.Get("/{provider}/callback", authHandler.OAuthLogin)
+	})
 	return r
 }

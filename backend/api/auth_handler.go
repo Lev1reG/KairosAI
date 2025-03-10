@@ -234,15 +234,50 @@ func (h *AuthHandler) VerifyEmail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-  err := h.authService.VerifyEmail(r.Context(), token)
-  if err != nil {
-    if err.Error() == "Invalid verification token" {
-      utils.ErrorResponse(w, http.StatusUnauthorized, err.Error())
-      return
-    }
-    utils.ErrorResponse(w, http.StatusInternalServerError, err.Error())
-    return
-  }
+	err := h.authService.VerifyEmail(r.Context(), token)
+	if err != nil {
+		if err.Error() == "Invalid verification token" {
+			utils.ErrorResponse(w, http.StatusUnauthorized, err.Error())
+			return
+		}
+		utils.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		return
+	}
 
-  utils.SuccessResponse(w, http.StatusOK, "Email verified successfully! You can now log in", nil)
+	utils.SuccessResponse(w, http.StatusOK, "Email verified successfully! You can now log in", nil)
+}
+
+func (h *AuthHandler) ResendVerificationEmail(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Email string `json:"email"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+
+	if !utils.IsValidEmail(req.Email) {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Invalid email format")
+		return
+	}
+
+	err := h.authService.ResendVerificationEmail(r.Context(), req.Email)
+	if err != nil {
+		switch err {
+		case services.ErrTooManyRequest:
+			utils.ErrorResponse(w, http.StatusTooManyRequests, err.Error())
+		case services.ErrUserNotFound:
+			utils.ErrorResponse(w, http.StatusNotFound, err.Error())
+		case services.ErrAlreadyVerified:
+			utils.ErrorResponse(w, http.StatusBadRequest, err.Error())
+		case services.ErrInternalServer, services.ErrEmailFailed:
+			utils.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		default:
+			utils.ErrorResponse(w, http.StatusInternalServerError, "Unxpected error")
+		}
+		return
+	}
+
+	utils.SuccessResponse(w, http.StatusOK, "Verification email sent successfully", nil)
 }

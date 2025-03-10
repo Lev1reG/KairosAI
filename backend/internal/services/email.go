@@ -27,7 +27,7 @@ func SendEmail(toEmail, subject, plainContent, htmlContent string) error {
 func SendVerificationEmail(toEmail, token string) error {
   cfg := config.LoadConfig()
     
-  verificationLink := fmt.Sprintf("%s/api/auth/verify-email?token=%s", cfg.APP_URL, token)
+  verificationLink := fmt.Sprintf("%s/auth/verify-email?token=%s", cfg.FE_URL, token)
 
 	subject := "Verify Your Email"
 	plainTextContent := "Click the link to verify your email: " + verificationLink

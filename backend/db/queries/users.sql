@@ -41,3 +41,7 @@ WHERE oauth_provider = $1 AND oauth_id = $2;
 -- name: VerifyUserEmail :exec
 UPDATE users SET email_verified = TRUE
 WHERE id = $1;
+
+-- name: UpdateUserPassword :exec
+UPDATE users SET password_hash = $2
+WHERE id = $1;

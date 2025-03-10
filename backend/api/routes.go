@@ -39,7 +39,9 @@ func authRoutes(authHandler *AuthHandler) http.Handler {
 	})
 
 	r.Post("/resend-verification", authHandler.ResendVerificationEmail)
-	r.Get("/verify-email", authHandler.VerifyEmail)
+	r.Post("/verify-email", authHandler.VerifyEmail)
+	r.Post("/forgot-password", authHandler.RequestResetPassword)
+  r.Post("/reset-password", authHandler.ResetPassword)
 
 	r.Route("/oauth", func(r chi.Router) {
 		r.Get("/{provider}/login", authHandler.RedirectToOAuthProvider)

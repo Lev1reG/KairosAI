@@ -244,6 +244,21 @@ func (q *Queries) GetVerifiedUserByEmail(ctx context.Context, email string) (Use
 	return i, err
 }
 
+const updateUserPassword = `-- name: UpdateUserPassword :exec
+UPDATE users SET password_hash = $2
+WHERE id = $1
+`
+
+type UpdateUserPasswordParams struct {
+	ID           pgtype.UUID `json:"id"`
+	PasswordHash pgtype.Text `json:"password_hash"`
+}
+
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) error {
+	_, err := q.db.Exec(ctx, updateUserPassword, arg.ID, arg.PasswordHash)
+	return err
+}
+
 const verifyUserEmail = `-- name: VerifyUserEmail :exec
 UPDATE users SET email_verified = TRUE
 WHERE id = $1

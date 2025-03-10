@@ -20,6 +20,7 @@ import (
 )
 
 var resendCache = cache.New(10*time.Minute, 15*time.Minute)
+var forgotPasswordCache = cache.New(10*time.Minute, 15*time.Minute)
 
 type AuthService struct {
 	db        *pgxpool.Pool
@@ -87,6 +88,86 @@ func (a *AuthService) RegisterUser(ctx context.Context, name, username, email, p
 	return &user, nil
 }
 
+func (a *AuthService) RequestResetPassword(ctx context.Context, email string) error {
+	queries := db.New(a.db)
+
+	if _, found := forgotPasswordCache.Get(email); found {
+		return ErrTooManyRequest
+	}
+
+	user, err := queries.GetUserByEmail(ctx, email)
+	if err != nil {
+		logger.Log.Error("Error getting user by email", zap.Error(err))
+		return ErrUserNotFound
+	}
+
+	isEmailVerified := user.EmailVerified.Valid && user.EmailVerified.Bool
+	if !isEmailVerified {
+		return ErrNotVerified
+	}
+
+	isOauthUser := user.OauthProvider.Valid && user.OauthProvider.String != "local"
+	if isOauthUser {
+		return ErrOauthUser
+	}
+
+	token, err := utils.GenerateSecureToken()
+	if err != nil {
+		logger.Log.Error("Error generating secure token", zap.Error(err))
+		return ErrInternalServer
+	}
+
+	hashedToken := utils.HashToken(token)
+	err = queries.CreatePasswordResetToken(ctx, db.CreatePasswordResetTokenParams{
+		UserID: user.ID,
+		Token:  hashedToken,
+	})
+	if err != nil {
+		logger.Log.Error("Error inserting password reset token", zap.Error(err))
+		return ErrInternalServer
+	}
+
+	if err := SendResetPasswordEmail(email, token); err != nil {
+		logger.Log.Error("Error sending reset password email", zap.Error(err))
+		return ErrEmailFailed
+	}
+
+	forgotPasswordCache.Set(email, true, 5*time.Minute)
+
+	return nil
+}
+
+func (a *AuthService) ResetPassword(ctx context.Context, token, newPassword string) error {
+	queries := db.New(a.db)
+
+	hashedToken := utils.HashToken(token)
+
+	userID, err := queries.GetUserByResetToken(ctx, hashedToken)
+	if err != nil {
+		logger.Log.Error("Error getting user by reset token", zap.Error(err))
+	  return errors.New("Invalid token")
+	}
+
+	hashedPassword, err := utils.HashPassword(newPassword)
+	if err != nil {
+		logger.Log.Error("Failed to hash password", zap.Error(err))
+		return errors.New("Failed to hash password")
+	}
+
+	err = queries.UpdateUserPassword(ctx, db.UpdateUserPasswordParams{
+		ID:           userID,
+		PasswordHash: pgtype.Text{String: hashedPassword, Valid: true},
+	})
+  if err != nil {
+    logger.Log.Error("Error updating user password", zap.Error(err))
+    return errors.New("Failed to update password")
+  }
+
+  _ = queries.DeletePasswordResetToken(ctx, userID)
+
+  return nil
+}
+
 func (a *AuthService) ResendVerificationEmail(ctx context.Context, email string) error {
 	queries := db.New(a.db)
 
@@ -124,12 +205,12 @@ func (a *AuthService) ResendVerificationEmail(ctx context.Context, email string)
 
 	if err := SendVerificationEmail(email, token); err != nil {
 		logger.Log.Error("Error sending verification email", zap.Error(err))
-	  return ErrEmailFailed
+		return ErrEmailFailed
 	}
 
-  resendCache.Set(email, true, 5*time.Minute)
+	resendCache.Set(email, true, 5*time.Minute)
 
-  return nil
+	return nil
 }
 
 // Login a local user

@@ -281,3 +281,73 @@ func (h *AuthHandler) ResendVerificationEmail(w http.ResponseWriter, r *http.Req
 
 	utils.SuccessResponse(w, http.StatusOK, "Verification email sent successfully", nil)
 }
+
+func (h *AuthHandler) RequestResetPassword(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Email string `json:"email"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+
+	if !utils.IsValidEmail(req.Email) {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Invalid email format")
+		return
+	}
+
+	err := h.authService.RequestResetPassword(r.Context(), req.Email)
+	if err != nil {
+		switch err {
+		case services.ErrTooManyRequest:
+			utils.ErrorResponse(w, http.StatusTooManyRequests, err.Error())
+		case services.ErrUserNotFound:
+			utils.ErrorResponse(w, http.StatusNotFound, err.Error())
+		case services.ErrNotVerified:
+			utils.ErrorResponse(w, http.StatusBadRequest, err.Error())
+		case services.ErrInternalServer, services.ErrEmailFailed:
+			utils.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+		case services.ErrOauthUser:
+			utils.ErrorResponse(w, http.StatusBadRequest, err.Error())
+		default:
+			utils.ErrorResponse(w, http.StatusInternalServerError, "Unxpected error")
+		}
+		return
+	}
+
+	utils.SuccessResponse(w, http.StatusOK, "Reset password email sent successfully", nil)
+}
+
+func (h *AuthHandler) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		NewPassword string `json:"new_password"`
+	}
+
+	token := r.URL.Query().Get("token")
+	if token == "" {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Invalid token")
+		return
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+
+	if err := utils.IsValidPassword(req.NewPassword); err != nil {
+		utils.ErrorResponse(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err := h.authService.ResetPassword(r.Context(), token, req.NewPassword)
+	if err != nil {
+		if err.Error() == "Invalid token" {
+			utils.ErrorResponse(w, http.StatusUnauthorized, err.Error())
+			return
+		}
+		utils.ErrorResponse(w, http.StatusInternalServerError, err.Error())
+	}
+
+	utils.SuccessResponse(w, http.StatusOK, "Password reset successfully", nil)
+}

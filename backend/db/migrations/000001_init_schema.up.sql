@@ -21,6 +21,14 @@ CREATE TABLE email_verifications (
     created_at TIMESTAMP DEFAULT now()
 );
 
+CREATE TABLE password_resets (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    token TEXT NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT now()
+);
+
 -- Create schedules table
 CREATE TABLE schedules (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),

@@ -94,7 +94,7 @@ func GenerateRandomState() string {
 	return base64.URLEncoding.EncodeToString(b)
 }
 
-func ExtractOAuthUserInfo(provider string, userInfo map[string]interface{}) (string, string, string, string, error) {
+func ExtractOAuthUserInfo(provider string, userInfo map[string]interface{}) (string, string, string, string) {
 	var email, name, avatarURL, oauthID string
 
 	switch provider {
@@ -104,8 +104,8 @@ func ExtractOAuthUserInfo(provider string, userInfo map[string]interface{}) (str
 		avatarURL, _ = userInfo["picture"].(string)
 		oauthID, _ = userInfo["id"].(string)
 	default:
-		return "", "", "", "", errors.New("Invalid OAuth provider")
+		return "", "", "", ""
 	}
 
-	return email, name, avatarURL, oauthID, nil
+	return email, name, avatarURL, oauthID
 }

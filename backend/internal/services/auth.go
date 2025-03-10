@@ -283,7 +283,7 @@ func (a *AuthService) OAuthLogin(ctx context.Context, provider, code string) (st
 		return "", err
 	}
 
-	email, name, avatarURL, oauthID, err := utils.ExtractOAuthUserInfo(provider, userInfo)
+	email, name, avatarURL, oauthID := utils.ExtractOAuthUserInfo(provider, userInfo)
 
 	logger.Log.Debug("OAuth user info", zap.String("email", email), zap.String("name", name), zap.String("avatar_url", avatarURL), zap.String("oauth_id", oauthID))
 

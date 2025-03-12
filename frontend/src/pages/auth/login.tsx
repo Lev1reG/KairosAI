@@ -1,4 +1,3 @@
-import Navbar from "../../components/navbar";
 import InputField from "../../components/inputField";
 import googleLogo from "../../assets/Google.svg";
 import { User, Lock } from "lucide-react";
@@ -8,10 +7,6 @@ import { Link } from "react-router-dom";
 const LoginPage = () => {
   return (
     <div className="bg-gray-50">
-      <Navbar>
-      <button className="px-4 py-1 rounded-full text-white mr-4" style={{backgroundColor: "#143A52"}}>Login</button>
-      <button className="px-4 py-1 rounded-full bg-gray-200" style={{color: "#757575"}}>Register</button>
-      </Navbar>
       <h1 className=" text-2xl font-bold text-center mb-2 py-10">Hi, Welcome Back!</h1>
       <div className="flex items-center justify-center min-h-screen py-12">
         <div className="bg-white p-20 rounded-2xl shadow-lg w-full max-w-2xl h-150 space-y-6 py-25">

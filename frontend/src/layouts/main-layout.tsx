@@ -1,12 +1,11 @@
-import { Link, Outlet } from "react-router-dom";
+import Navbar from "@/components/navbar";
+import { Outlet } from "react-router-dom";
 
 const MainLayout = () => {
   return (
     <div>
       {/* Navigation */}
-      <nav>
-        <Link to="/">Home</Link> 
-      </nav>
+      <Navbar />
 
       {/* Page Content */}
       <main>

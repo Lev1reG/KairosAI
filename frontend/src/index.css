@@ -7,6 +7,15 @@
 
 @theme {
   --font-sans: 'Poppins', 'Inter';
+
+  --color-background-custom: #F7F9F9;
+  --color-green-100: #EDF4F3;
+  --color-green-300: #C8DDDC;
+  --color-green-500: #A3C6C4;
+  --color-green-700: #72918F;
+  --color-blue-100: #4D91BC;
+  --color-blue-300: #306687;
+  --color-blue-500: #143A52;
 }
 
 :root {

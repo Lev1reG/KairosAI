@@ -22,6 +22,8 @@ const buttonVariants = cva(
         navbarActive: "bg-blue-500 hover:bg-blue-300 text-white",
         navbar:
           "bg-neutral-100 text-neutral-600 hover:bg-blue-500 hover:text-white",
+        submit:
+          "bg-green-500 text-black shadow-xs hover:bg-green-300 rounded-xl",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",

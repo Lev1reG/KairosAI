@@ -5,7 +5,7 @@ import Header from "./header";
 interface CardWrapperProps {
   children: React.ReactNode;
   headerLabel: string;
-  footer: React.ReactNode;
+  footer?: React.ReactNode;
 }
 
 const CardWrapper = ({ children, headerLabel, footer }: CardWrapperProps) => {
@@ -15,7 +15,7 @@ const CardWrapper = ({ children, headerLabel, footer }: CardWrapperProps) => {
         <Header label={headerLabel} />
       </CardHeader>
       <CardContent>{children}</CardContent>
-      <CardFooter>{footer}</CardFooter>
+      {footer && <CardFooter>{footer}</CardFooter>}
     </Card>
   );
 };

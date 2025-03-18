@@ -1,6 +1,10 @@
-import { getCurrentUser, login } from "@/api/auth";
+import { getCurrentUser, login, logout } from "@/api/auth";
+import { useAuthStore } from "@/stores/use-auth-store";
+import { ApiResponse } from "@/types/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 
 export const useLogin = () => {
   const queryClient = useQueryClient();
@@ -19,15 +23,58 @@ export const useLogin = () => {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
     },
 
-    onError: () => {
-      toast.error("Failed to log in. Please try again.", { id: "loginToast" });
+    onError: (error: ApiResponse<null>) => {
+      const errorMessage =
+        error.message || "Failed to log in. Please try again.";
+      toast.error(errorMessage, { id: "loginToast" });
     },
   });
 };
 
 export const useCurrentUser = () => {
-  return useQuery({
+  const { setUser, logout } = useAuthStore();
+
+  const query = useQuery({
     queryKey: ["currentUser"],
     queryFn: getCurrentUser,
+    retry: false,
+  });
+
+  useEffect(() => {
+    if (query.isSuccess && query.data) {
+      setUser(query.data?.data ?? null);
+    } else if (query.isError) {
+      logout();
+    }
+  }, [query.isSuccess, query.isError, query.data, setUser, logout]);
+
+  return query;
+};
+
+export const useLogout = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationKey: ["auth", "logout"],
+    mutationFn: logout,
+
+    onMutate: () => {
+      toast.loading("Logging out...", { id: "logoutToast" });
+    },
+
+    onSuccess: () => {
+      toast.success("Logged out successfully!", { id: "logoutToast" });
+
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+
+      navigate("/auth/login", { replace: true });
+    },
+
+    onError: (error: ApiResponse<null>) => {
+      const errorMessage =
+        error.message || "Failed to log out. Please try again.";
+      toast.error(errorMessage, { id: "logoutToast" });
+    },
   });
 };

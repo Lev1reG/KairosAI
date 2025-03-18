@@ -16,8 +16,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
+import { useLogin } from "@/hooks/use-auth";
 
 const LoginPage = () => {
+  const loginMutation = useLogin();
+
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
     defaultValues: {
@@ -27,7 +30,7 @@ const LoginPage = () => {
   });
 
   const onSubmit = (data: z.infer<typeof LoginSchema>) => {
-    console.log(data);
+    loginMutation.mutate(data);
   };
 
   return (
@@ -81,8 +84,13 @@ const LoginPage = () => {
                 </Link>
               </div>
               <div className="flex flex-col space-y-2">
-                <Button variant="submit" type="submit" className="w-full">
-                  Login
+                <Button
+                  variant="submit"
+                  type="submit"
+                  className="w-full"
+                  disabled={loginMutation.isPending}
+                >
+                  {loginMutation.isPending ? "Loading..." : "Login"}
                 </Button>
                 <Button variant="submit" type="button" className="w-full">
                   <FcGoogle className="w-8 h-8" />

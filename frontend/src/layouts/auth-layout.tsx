@@ -2,7 +2,7 @@ import { useCurrentUser } from "@/hooks/use-auth";
 import { Navigate } from "react-router-dom";
 import MainLayout from "./main-layout";
 
-const ProtectedLayout = () => {
+const AuthLayout = () => {
   const { data: response, isLoading } = useCurrentUser();
 
   if (isLoading) {
@@ -11,11 +11,11 @@ const ProtectedLayout = () => {
 
   const user = response?.data;
 
-  if (!!!user) {
-    return <Navigate to="/auth/login" replace />;
+  if (!!user) {
+    return <Navigate to="/" replace />;
   }
 
   return <MainLayout />;
 };
 
-export default ProtectedLayout;
+export default AuthLayout;

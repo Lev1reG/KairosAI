@@ -1,6 +1,7 @@
 import { ApiResponse } from "@/types/api";
 import { api, handleApiError } from "./api";
 import { User } from "@/types/user";
+import { Token } from "@/types/token";
 
 export const login = async (email: string, password: string) => {
   try {
@@ -8,6 +9,17 @@ export const login = async (email: string, password: string) => {
       email,
       password,
     });
+    return response.data;
+  } catch (error: unknown) {
+    handleApiError(error);
+  }
+};
+
+export const oauthLogin = async (code: string, state: string) => {
+  try {
+    const response = await api.get<ApiResponse<Token>>(
+      `/auth/oauth/google/callback?state=${state}&code=${code}`,
+    );
     return response.data;
   } catch (error: unknown) {
     handleApiError(error);

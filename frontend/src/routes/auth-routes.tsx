@@ -7,6 +7,7 @@ import PasswordChangeSuccessPage from "@/pages/auth/password-change-success";
 import PasswordChangeFailedPage from "@/pages/auth/password-change-failed";
 import EmailVerificationPage from "@/pages/auth/verify-email";
 import AuthLayout from "@/layouts/auth-layout";
+import OAuthCallback from "@/pages/auth/oauth-callback";
 
 const authRoutes: RouteObject = {
   path: "/auth",
@@ -19,6 +20,7 @@ const authRoutes: RouteObject = {
     { path: "reset-password/success", element: <PasswordChangeSuccessPage /> },
     { path: "reset-password/failed", element: <PasswordChangeFailedPage /> },
     { path: "email-verification", element: <EmailVerificationPage /> },
+    { path: "google/callback", element: <OAuthCallback /> },
   ],
 };
 

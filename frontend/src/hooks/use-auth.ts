@@ -1,4 +1,4 @@
-import { getCurrentUser, login, logout } from "@/api/auth";
+import { getCurrentUser, login, logout, oauthLogin } from "@/api/auth";
 import { useAuthStore } from "@/stores/use-auth-store";
 import { ApiResponse } from "@/types/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -21,6 +21,29 @@ export const useLogin = () => {
     onSuccess: () => {
       toast.success("Logged in successfully!", { id: "loginToast" });
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+    },
+
+    onError: (error: ApiResponse<null>) => {
+      const errorMessage =
+        error.message || "Failed to log in. Please try again.";
+      toast.error(errorMessage, { id: "loginToast" });
+    },
+  });
+};
+
+export const useOauthLogin = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationKey: ["auth", "oauthLogin"],
+    mutationFn: ({ code, state }: { code: string; state: string }) =>
+      oauthLogin(code, state),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      toast.success("Logged in successfully!", { id: "loginToast" });
+      navigate("/", { replace: true });
     },
 
     onError: (error: ApiResponse<null>) => {

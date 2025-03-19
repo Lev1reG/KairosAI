@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FcGoogle } from "react-icons/fc";
+import GoogleLoginButton from "@/components/auth/google-login-button";
 
 const RegisterPage = () => {
   const form = useForm<z.infer<typeof RegisterSchema>>({
@@ -114,10 +114,7 @@ const RegisterPage = () => {
                 <Button variant="submit" type="submit" className="w-full">
                   Register
                 </Button>
-                <Button variant="submit" type="button" className="w-full">
-                  <FcGoogle className="w-8 h-8" />
-                  Login with Google
-                </Button>
+                <GoogleLoginButton /> 
               </div>
           </form>
         </Form>

@@ -20,6 +20,7 @@ const RegisterPage = () => {
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
+      name: "",
       email: "",
       username: "",
       password: "",
@@ -37,6 +38,24 @@ const RegisterPage = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="text"
+                        placeholder="Enter your name"
+                        className="bg-neutral-100"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="email"
@@ -110,12 +129,12 @@ const RegisterPage = () => {
                 )}
               />
             </div>
-              <div className="flex flex-col space-y-2">
-                <Button variant="submit" type="submit" className="w-full">
-                  Register
-                </Button>
-                <GoogleLoginButton /> 
-              </div>
+            <div className="flex flex-col space-y-2">
+              <Button variant="submit" type="submit" className="w-full">
+                Register
+              </Button>
+              <GoogleLoginButton />
+            </div>
           </form>
         </Form>
       </AuthCard>

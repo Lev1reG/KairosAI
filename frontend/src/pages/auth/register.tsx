@@ -15,8 +15,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import GoogleLoginButton from "@/components/auth/google-login-button";
+import { useRegister } from "@/hooks/use-auth";
 
 const RegisterPage = () => {
+  const registerMutation = useRegister();
+
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
@@ -29,7 +32,12 @@ const RegisterPage = () => {
   });
 
   const onSubmit = (data: z.infer<typeof RegisterSchema>) => {
-    console.log(data);
+    registerMutation.mutate({
+      name: data.name,
+      email: data.email,
+      username: data.username,
+      password: data.password,
+    });
   };
 
   return (

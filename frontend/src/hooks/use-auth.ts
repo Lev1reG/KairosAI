@@ -1,10 +1,75 @@
-import { getCurrentUser, login, logout, oauthLogin } from "@/api/auth";
+import {
+  getCurrentUser,
+  login,
+  logout,
+  oauthLogin,
+  register,
+  verifyEmail,
+} from "@/api/auth";
 import { useAuthStore } from "@/stores/use-auth-store";
+import { useRegisterStore } from "@/stores/use-register-store";
 import { ApiResponse } from "@/types/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+
+export const useRegister = () => {
+  const { setVerificationSent } = useRegisterStore();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationKey: ["auth", "register"],
+    mutationFn: ({
+      name,
+      email,
+      username,
+      password,
+    }: {
+      name: string;
+      email: string;
+      username: string;
+      password: string;
+    }) => register(name, username, email, password),
+
+    onMutate: () => {
+      toast.loading("Registering...", { id: "registerToast" });
+    },
+
+    onSuccess: () => {
+      toast.success("Registered successfully!", { id: "registerToast" });
+      setVerificationSent(true);
+      navigate("/auth/email-verification", { replace: true });
+    },
+
+    onError: (error: ApiResponse<null>) => {
+      const errorMessage =
+        error.message || "Failed to register. Please try again.";
+      toast.error(errorMessage, { id: "registerToast" });
+    },
+  });
+};
+
+export const useVerifyEmail = () => {
+  return useMutation({
+    mutationKey: ["auth", "verifyEmail"],
+    mutationFn: ({ token }: { token: string }) => verifyEmail(token),
+
+    onMutate: () => {
+      toast.loading("Verifying email...", { id: "verifyEmailToast" });
+    },
+
+    onSuccess: () => {
+      toast.success("Email verified successfully!", { id: "verifyEmailToast" });
+    },
+
+    onError: (error: ApiResponse<null>) => {
+      const errorMessage =
+        error.message || "Failed to verify email. Please try again.";
+      toast.error(errorMessage, { id: "verifyEmailToast" });
+    },
+  });
+};
 
 export const useLogin = () => {
   const queryClient = useQueryClient();

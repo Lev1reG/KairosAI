@@ -138,8 +138,13 @@ const RegisterPage = () => {
               />
             </div>
             <div className="flex flex-col space-y-2">
-              <Button variant="submit" type="submit" className="w-full">
-                Register
+              <Button
+                variant="submit"
+                type="submit"
+                className="w-full"
+                disabled={registerMutation.isPending}
+              >
+                {registerMutation.isPending ? "Loading..." : "Register"}
               </Button>
               <GoogleLoginButton />
             </div>

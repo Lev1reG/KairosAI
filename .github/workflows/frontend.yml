@@ -35,3 +35,16 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  docker-build:
+    name: Build Docker Image
+    needs: build-lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Image
+        run: docker build -t kairosai-frontend .
+        working-directory: frontend

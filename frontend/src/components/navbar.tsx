@@ -5,9 +5,14 @@ import {
 } from "./ui/navigation-menu";
 import { Button } from "./ui/button";
 import { Link, useLocation } from "react-router-dom";
+import { useAuthStore } from "@/stores/use-auth-store";
+import { useLogout } from "@/hooks/use-auth";
 
 const Navbar = () => {
   const location = useLocation();
+
+  const { isAuthenticated } = useAuthStore();
+  const logoutMutation = useLogout();
 
   const resolveVariant = (path: string) => {
     if (location.pathname == path) {
@@ -22,19 +27,31 @@ const Navbar = () => {
         <NavigationMenu>
           <NavigationMenuList className="gap-8">
             <NavigationMenuItem>
-              <Link to="/auth/login">
-                <Button variant={resolveVariant("/auth/login")} size="lg">
-                  Login
+              {isAuthenticated ? (
+                <Button
+                  onClick={() => logoutMutation.mutate()}
+                  variant={resolveVariant("/")}
+                  size="lg"
+                >
+                  Logout
                 </Button>
-              </Link>
+              ) : (
+                <Link to="/auth/login">
+                  <Button variant={resolveVariant("/auth/login")} size="lg">
+                    Login
+                  </Button>
+                </Link>
+              )}
             </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link to="/auth/register">
-                <Button variant={resolveVariant("/auth/register")} size="lg">
-                  Register
-                </Button>
-              </Link>
-            </NavigationMenuItem>
+            {isAuthenticated ? null : (
+              <NavigationMenuItem>
+                <Link to="/auth/register">
+                  <Button variant={resolveVariant("/auth/register")} size="lg">
+                    Register
+                  </Button>
+                </Link>
+              </NavigationMenuItem>
+            )}
           </NavigationMenuList>
         </NavigationMenu>
       </div>

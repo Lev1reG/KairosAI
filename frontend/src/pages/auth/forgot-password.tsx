@@ -15,8 +15,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useRequestPasswordReset } from "@/hooks/use-auth";
 
 const ForgotPasswordPage = () => {
+  const requestPasswordReset = useRequestPasswordReset();
+
   const form = useForm<z.infer<typeof ForgotPasswordSchema>>({
     resolver: zodResolver(ForgotPasswordSchema),
     defaultValues: {
@@ -25,7 +28,7 @@ const ForgotPasswordPage = () => {
   });
 
   const onSubmit = (data: z.infer<typeof ForgotPasswordSchema>) => {
-    console.log(data);
+    requestPasswordReset.mutate(data);
   };
 
   return (
@@ -63,8 +66,15 @@ const ForgotPasswordPage = () => {
                 )}
               />
               <div className="flex flex-col space-y-2">
-                <Button variant="submit" type="submit" className="w-full">
-                  Send Reset Link
+                <Button
+                  variant="submit"
+                  type="submit"
+                  className="w-full"
+                  disabled={requestPasswordReset.isPending}
+                >
+                  {requestPasswordReset.isPending
+                    ? "Loading..."
+                    : "Reset password"}
                 </Button>
                 <Link to="/auth/login">
                   <Button variant="ghost" className="w-full">

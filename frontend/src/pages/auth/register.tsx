@@ -14,12 +14,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { FcGoogle } from "react-icons/fc";
+import GoogleLoginButton from "@/components/auth/google-login-button";
+import { useRegister } from "@/hooks/use-auth";
 
 const RegisterPage = () => {
+  const registerMutation = useRegister();
+
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
+      name: "",
       email: "",
       username: "",
       password: "",
@@ -28,7 +32,12 @@ const RegisterPage = () => {
   });
 
   const onSubmit = (data: z.infer<typeof RegisterSchema>) => {
-    console.log(data);
+    registerMutation.mutate({
+      name: data.name,
+      email: data.email,
+      username: data.username,
+      password: data.password,
+    });
   };
 
   return (
@@ -37,6 +46,24 @@ const RegisterPage = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <div className="space-y-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="text"
+                        placeholder="Enter your name"
+                        className="bg-neutral-100"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="email"
@@ -110,15 +137,17 @@ const RegisterPage = () => {
                 )}
               />
             </div>
-              <div className="flex flex-col space-y-2">
-                <Button variant="submit" type="submit" className="w-full">
-                  Register
-                </Button>
-                <Button variant="submit" type="button" className="w-full">
-                  <FcGoogle className="w-8 h-8" />
-                  Login with Google
-                </Button>
-              </div>
+            <div className="flex flex-col space-y-2">
+              <Button
+                variant="submit"
+                type="submit"
+                className="w-full"
+                disabled={registerMutation.isPending}
+              >
+                {registerMutation.isPending ? "Loading..." : "Register"}
+              </Button>
+              <GoogleLoginButton />
+            </div>
           </form>
         </Form>
       </AuthCard>

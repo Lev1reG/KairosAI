@@ -1,14 +1,17 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCurrentUser } from "@/hooks/use-auth";
 
 const Home = () => {
-  const navigate = useNavigate();
+  const { data: user, isPending } = useCurrentUser();
 
-  useEffect(() => {
-    navigate("/auth/login");
-  }, [navigate]);
+  if (isPending) {
+    return <div>Loading...</div>;
+  }
 
-  return null;
+  return (
+    <div>
+      <pre>{JSON.stringify(user, null, 2)}</pre>
+    </div>
+  );
 };
 
 export default Home;

@@ -11,8 +11,8 @@ interface StatusCardProps {
   type: "success" | "error" | "email";
   headerLabel: string;
   message: string;
-  buttonLabel: string;
-  buttonHref: string;
+  buttonLabel?: string;
+  buttonHref?: string;
 }
 
 const StatusCard = ({
@@ -41,11 +41,13 @@ const StatusCard = ({
         <p className="font-semibold text-neutral-500 text-sm text-center">
           {message}
         </p>
-        <Link to={buttonHref} className="w-full">
-          <Button variant="submit" className="w-full">
-            {buttonLabel}
-          </Button>
-        </Link>
+        {buttonLabel && buttonHref && (
+          <Link to={buttonHref} className="w-full">
+            <Button variant="submit" className="w-full">
+              {buttonLabel}
+            </Button>
+          </Link>
+        )}
       </div>
     </CardWrapper>
   );

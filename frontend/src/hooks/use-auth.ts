@@ -1,18 +1,91 @@
 import {
+  forgotPassword,
   getCurrentUser,
   login,
   logout,
   oauthLogin,
   register,
+  resetPassword,
   verifyEmail,
 } from "@/api/auth";
 import { useAuthStore } from "@/stores/use-auth-store";
 import { useRegisterStore } from "@/stores/use-register-store";
+import { useResetPasswordStore } from "@/stores/use-reset-password-store";
 import { ApiResponse } from "@/types/api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
+
+export const useResetPassword = () => {
+  const { setSuccessResetPassword, setOpenResetPasswordModal } =
+    useResetPasswordStore();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationKey: ["auth", "resetPassword"],
+    mutationFn: ({
+      token,
+      newPassword,
+    }: {
+      token: string;
+      newPassword: string;
+    }) => resetPassword(token, newPassword),
+
+    onMutate: () => {
+      toast.loading("Resetting password...", { id: "resetPasswordToast" });
+    },
+
+    onSuccess: () => {
+      toast.success("Password reset successfully!", {
+        id: "resetPasswordToast",
+      });
+      setOpenResetPasswordModal(true);
+      setSuccessResetPassword(true);
+      navigate("/auth/reset-password-status", { replace: true });
+    },
+
+    onError: (error: ApiResponse<null>) => {
+      const errorMessage =
+        error.message || "Failed to reset password. Please try again.";
+      toast.error(errorMessage, { id: "resetPasswordToast" });
+      setOpenResetPasswordModal(true);
+      setSuccessResetPassword(false);
+      navigate("/auth/reset-password-status", { replace: true });
+    },
+  });
+};
+
+export const useRequestPasswordReset = () => {
+  const { setVerificationSent } = useResetPasswordStore();
+  const navigate = useNavigate();
+
+  return useMutation({
+    mutationKey: ["auth", "requestPasswordReset"],
+    mutationFn: ({ email }: { email: string }) => forgotPassword(email),
+
+    onMutate: () => {
+      toast.loading("Sending password reset email...", {
+        id: "requestPasswordResetToast",
+      });
+    },
+
+    onSuccess: () => {
+      toast.success("Password reset email sent!", {
+        id: "requestPasswordResetToast",
+      });
+      setVerificationSent(true);
+      navigate("/auth/reset-password-email-sent", { replace: true });
+    },
+
+    onError: (error: ApiResponse<null>) => {
+      const errorMessage =
+        error.message ||
+        "Failed to send password reset email. Please try again.";
+      toast.error(errorMessage, { id: "requestPasswordResetToast" });
+    },
+  });
+};
 
 export const useRegister = () => {
   const { setVerificationSent } = useRegisterStore();

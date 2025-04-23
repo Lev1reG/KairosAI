@@ -75,6 +75,14 @@ func (s *ScheduleService) CreateSchedule(ctx context.Context, input CreateSchedu
 		return nil, errors.New("You already have a schedule in this time range")
 	}
 
+	if input.EndTime.Sub(input.StartTime) > 24*time.Hour {
+		return nil, errors.New("Schedule duration cannot exceed 24 hours")
+	}
+
+	if input.StartTime.Before(time.Now()) {
+		return nil, errors.New("Start time cannot be in the past")
+	}
+
 	schedule, err := queries.CreateSchedule(ctx, params)
 	if err != nil {
 		logger.Log.Error("Failed to create schedule", zap.Error(err))

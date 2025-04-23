@@ -11,6 +11,47 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const createSchedule = `-- name: CreateSchedule :one
+INSERT INTO schedules (
+  user_id, title, description, start_time, end_time, status, created_at, updated_at
+)
+VALUES (
+  $1, $2, $3, $4, $5, DEFAULT, NOW(), NOW() 
+)
+RETURNING id, user_id, title, description, start_time, end_time, status, created_at, updated_at
+`
+
+type CreateScheduleParams struct {
+	UserID      pgtype.UUID        `json:"user_id"`
+	Title       string             `json:"title"`
+	Description pgtype.Text        `json:"description"`
+	StartTime   pgtype.Timestamptz `json:"start_time"`
+	EndTime     pgtype.Timestamptz `json:"end_time"`
+}
+
+func (q *Queries) CreateSchedule(ctx context.Context, arg CreateScheduleParams) (Schedule, error) {
+	row := q.db.QueryRow(ctx, createSchedule,
+		arg.UserID,
+		arg.Title,
+		arg.Description,
+		arg.StartTime,
+		arg.EndTime,
+	)
+	var i Schedule
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Title,
+		&i.Description,
+		&i.StartTime,
+		&i.EndTime,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getScheduleByID = `-- name: GetScheduleByID :one
 SELECT id, user_id, title, description, start_time, end_time, status, created_at, updated_at FROM schedules
 WHERE id = $1 AND user_id = $2

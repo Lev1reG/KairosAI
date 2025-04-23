@@ -57,7 +57,7 @@ func (h *ScheduleHandler) CreateSchedules(w http.ResponseWriter, r *http.Request
 	schedules, err := h.scheduleService.CreateSchedule(r.Context(), reqBody)
 	if err != nil {
 		logger.Log.Error("Failed to create schedule", zap.Error(err))
-		utils.ErrorResponse(w, http.StatusInternalServerError, "Failed to create schedule")
+		utils.ErrorResponse(w, http.StatusInternalServerError, "Failed to create schedule: "+err.Error())
 		return
 	}
 

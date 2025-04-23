@@ -62,6 +62,19 @@ func (s *ScheduleService) CreateSchedule(ctx context.Context, input CreateSchedu
 		params.Description = pgtype.Text{String: *input.Description, Valid: true}
 	}
 
+	conflict, err := queries.CheckScheduleConflict(ctx, db.CheckScheduleConflictParams{
+		UserID:  params.UserID,
+		Column2: params.StartTime,
+		Column3: params.EndTime,
+	})
+	if err != nil {
+		logger.Log.Error("Failed to check schedule conflict", zap.Error(err))
+		return nil, err
+	}
+	if conflict {
+		return nil, errors.New("You already have a schedule in this time range")
+	}
+
 	schedule, err := queries.CreateSchedule(ctx, params)
 	if err != nil {
 		logger.Log.Error("Failed to create schedule", zap.Error(err))

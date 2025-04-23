@@ -15,3 +15,15 @@ VALUES (
   $1, $2, $3, $4, $5, DEFAULT, NOW(), NOW() 
 )
 RETURNING *;
+
+-- name: CheckScheduleConflict :one
+SELECT EXISTS (
+  SELECT 1 FROM schedules
+  WHERE user_id = $1
+    AND status = 'scheduled'
+    AND (
+      start_time, end_time
+  ) OVERLAPS (
+    $2::timestamptz, $3::timestamptz
+  )
+);

@@ -11,6 +11,32 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const checkScheduleConflict = `-- name: CheckScheduleConflict :one
+SELECT EXISTS (
+  SELECT 1 FROM schedules
+  WHERE user_id = $1
+    AND status = 'scheduled'
+    AND (
+      start_time, end_time
+  ) OVERLAPS (
+    $2::timestamptz, $3::timestamptz
+  )
+)
+`
+
+type CheckScheduleConflictParams struct {
+	UserID  pgtype.UUID        `json:"user_id"`
+	Column2 pgtype.Timestamptz `json:"column_2"`
+	Column3 pgtype.Timestamptz `json:"column_3"`
+}
+
+func (q *Queries) CheckScheduleConflict(ctx context.Context, arg CheckScheduleConflictParams) (bool, error) {
+	row := q.db.QueryRow(ctx, checkScheduleConflict, arg.UserID, arg.Column2, arg.Column3)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const createSchedule = `-- name: CreateSchedule :one
 INSERT INTO schedules (
   user_id, title, description, start_time, end_time, status, created_at, updated_at

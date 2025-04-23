@@ -19,10 +19,10 @@ type ScheduleService struct {
 }
 
 type CreateScheduleInput struct {
-	Title       string    `json:"title" validate:"required,min=3,max=100"`
-	Description *string   `json:"description" validate:"omitempty,max=500"`
-	StartTime   time.Time `json:"start_time" validate:"required"`
-	EndTime     time.Time `json:"end_time" validate:"required,gtfield=StartTime"`
+	Title       string     `json:"title" validate:"required,min=3,max=100"`
+	Description *string    `json:"description,omitempty" validate:"omitempty,max=500"`
+	StartTime   time.Time  `json:"start_time" validate:"required"`
+	EndTime     *time.Time `json:"end_time,omitempty" validate:"omitempty,gtfield=StartTime"`
 	UserID      string
 }
 
@@ -50,12 +50,22 @@ func (s *ScheduleService) CreateSchedule(ctx context.Context, input CreateSchedu
 
 	pgUUID := pgtype.UUID{Bytes: parsedUUID, Valid: true}
 
+	endTime := input.EndTime
+	if endTime == nil {
+		defaultEnd := input.StartTime.Add(1 * time.Hour)
+		endTime = &defaultEnd
+	}
+
+	if endTime.Before(input.StartTime) {
+		return nil, errors.New("End time cannot be before start time")
+	}
+
 	params := db.CreateScheduleParams{
 		UserID:      pgUUID,
 		Title:       input.Title,
 		Description: pgtype.Text{String: "", Valid: false},
 		StartTime:   toTimestamptz(input.StartTime),
-		EndTime:     toTimestamptz(input.EndTime),
+		EndTime:     toTimestamptz(*endTime),
 	}
 
 	if input.Description != nil {
@@ -75,7 +85,7 @@ func (s *ScheduleService) CreateSchedule(ctx context.Context, input CreateSchedu
 		return nil, errors.New("You already have a schedule in this time range")
 	}
 
-	if input.EndTime.Sub(input.StartTime) > 24*time.Hour {
+	if endTime.Sub(input.StartTime) > 24*time.Hour {
 		return nil, errors.New("Schedule duration cannot exceed 24 hours")
 	}
 

@@ -89,3 +89,27 @@ nlu:
     - are you a human?
     - am I talking to a bot?
     - am I talking to a human?
+
+- intent: create_schedule
+  examples: |
+    - create a meeting for tomorrow at 5 PM
+    - schedule a call with John next Monday at 10 am
+    - book a dentist appointment for next Friday at 3pm
+    - set a reminder to water plants this Saturday at 8 am
+    - make a lunch appointment on Wednesday at 12
+    - organize a Zoom call with team at 9am tomorrow
+    - I want to add a new schedule for a conference on 20th May at 2pm
+    - schedule "design sprint" meeting on Thursday at 1 PM
+    - plan my doctor's appointment next Tuesday at 10
+    - add event called "presentation" next Wednesday at 9 am
+    - buat jadwal rapat untuk besok jam 5 sore
+    - jadwalkan panggilan dengan John hari Senin depan jam 10 pagi
+    - buat janji dokter gigi hari Jumat depan jam 3 sore
+    - setel pengingat untuk menyiram tanaman hari Sabtu jam 8 pagi
+    - atur jadwal makan siang hari Rabu jam 12 siang
+    - buat jadwal meeting Zoom dengan tim besok jam 9 pagi
+    - saya ingin menambahkan jadwal baru untuk konferensi tanggal 20 Mei jam 2 siang
+    - tambahkan event "sprint desain" pada hari Kamis jam 1 siang
+    - rencanakan kunjungan ke dokter hari Selasa depan jam 10
+    - buat jadwal presentasi hari Rabu depan jam 9 pagi
+

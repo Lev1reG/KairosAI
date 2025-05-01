@@ -28,3 +28,11 @@ stories:
   - action: utter_did_that_help
   - intent: deny
   - action: utter_goodbye
+
+- story: create schedule
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: create_schedule
+  - action: action_create_schedule
+  - action: utter_schedule_created

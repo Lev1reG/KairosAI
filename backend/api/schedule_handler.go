@@ -71,11 +71,27 @@ func (h *ScheduleHandler) GetAllSchedules(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	schedules, err := h.scheduleService.GetSchedulesByUser(r.Context(), userID)
+	limit := utils.ParseQueryInt(r, "limit", 10)
+	offset := utils.ParseQueryInt(r, "offset", 0)
+
+	schedules, err := h.scheduleService.GetSchedulesByUser(r.Context(), userID, int32(limit), int32(offset))
 	if err != nil {
 		logger.Log.Error("Failed to get schedules", zap.Error(err))
 		utils.ErrorResponse(w, http.StatusInternalServerError, "Failed to get schedules")
 	}
 
-	utils.SuccessResponse(w, http.StatusOK, "Schedules retrieved successfully", schedules)
+	total, err := h.scheduleService.CountSchedulesByUser(r.Context(), userID)
+	if err != nil {
+		logger.Log.Error("Failed to count schedules", zap.Error(err))
+		utils.ErrorResponse(w, http.StatusInternalServerError, "Failed to get schedule count")
+		return
+	}
+
+	meta := utils.PaginationMeta{
+		Limit:  limit,
+		Offset: offset,
+		Total:  total,
+	}
+
+	utils.SuccessPaginatedResponse(w, http.StatusOK, "Schedules retrieved successfully", schedules, meta)
 }

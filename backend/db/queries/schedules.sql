@@ -27,3 +27,13 @@ SELECT EXISTS (
     $2::timestamptz, $3::timestamptz
   )
 );
+
+-- name: GetSchedulesByUserWithPagination :many
+SELECT * FROM schedules
+WHERE user_id = $1
+ORDER BY start_time
+LIMIT $2 OFFSET $3;
+
+-- name: CountSchedulesByUser :one
+SELECT COUNT(*) FROM schedules
+WHERE user_id = $1;

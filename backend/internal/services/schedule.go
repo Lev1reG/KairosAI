@@ -102,7 +102,7 @@ func (s *ScheduleService) CreateSchedule(ctx context.Context, input CreateSchedu
 	return &schedule, nil
 }
 
-func (s *ScheduleService) GetSchedulesByUser(ctx context.Context, userID string) (*[]db.Schedule, error) {
+func (s *ScheduleService) GetSchedulesByUser(ctx context.Context, userID string, limit, offset int32) (*[]db.Schedule, error) {
 	queries := db.New(s.db)
 
 	parsedUUID, err := uuid.Parse(userID)
@@ -112,7 +112,11 @@ func (s *ScheduleService) GetSchedulesByUser(ctx context.Context, userID string)
 
 	pgUUID := pgtype.UUID{Bytes: parsedUUID, Valid: true}
 
-	schedules, err := queries.GetSchedulesByUser(ctx, pgUUID)
+	schedules, err := queries.GetSchedulesByUserWithPagination(ctx, db.GetSchedulesByUserWithPaginationParams{
+		UserID: pgUUID,
+		Limit:  limit,
+		Offset: offset,
+	})
 	if err != nil {
 		logger.Log.Error("Failed to get schedules by user", zap.Error(err))
 		return nil, err
@@ -124,4 +128,23 @@ func (s *ScheduleService) GetSchedulesByUser(ctx context.Context, userID string)
 	}
 
 	return &schedules, nil
+}
+
+func (s *ScheduleService) CountSchedulesByUser(ctx context.Context, userID string) (int64, error) {
+	queries := db.New(s.db)
+
+	parsedUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return 0, errors.New("Invalid user id format")
+	}
+
+	pgUUID := pgtype.UUID{Bytes: parsedUUID, Valid: true}
+
+	count, err := queries.CountSchedulesByUser(ctx, pgUUID)
+	if err != nil {
+		logger.Log.Error("Failed to count schedules by user", zap.Error(err))
+		return 0, err
+	}
+
+	return count, nil
 }

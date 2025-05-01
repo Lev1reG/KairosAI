@@ -37,6 +37,18 @@ func (q *Queries) CheckScheduleConflict(ctx context.Context, arg CheckScheduleCo
 	return exists, err
 }
 
+const countSchedulesByUser = `-- name: CountSchedulesByUser :one
+SELECT COUNT(*) FROM schedules
+WHERE user_id = $1
+`
+
+func (q *Queries) CountSchedulesByUser(ctx context.Context, userID pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countSchedulesByUser, userID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createSchedule = `-- name: CreateSchedule :one
 INSERT INTO schedules (
   user_id, title, description, start_time, end_time, status, created_at, updated_at
@@ -113,6 +125,49 @@ ORDER BY start_time
 
 func (q *Queries) GetSchedulesByUser(ctx context.Context, userID pgtype.UUID) ([]Schedule, error) {
 	rows, err := q.db.Query(ctx, getSchedulesByUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Schedule
+	for rows.Next() {
+		var i Schedule
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Title,
+			&i.Description,
+			&i.StartTime,
+			&i.EndTime,
+			&i.Status,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getSchedulesByUserWithPagination = `-- name: GetSchedulesByUserWithPagination :many
+SELECT id, user_id, title, description, start_time, end_time, status, created_at, updated_at FROM schedules
+WHERE user_id = $1
+ORDER BY start_time
+LIMIT $2 OFFSET $3
+`
+
+type GetSchedulesByUserWithPaginationParams struct {
+	UserID pgtype.UUID `json:"user_id"`
+	Limit  int32       `json:"limit"`
+	Offset int32       `json:"offset"`
+}
+
+func (q *Queries) GetSchedulesByUserWithPagination(ctx context.Context, arg GetSchedulesByUserWithPaginationParams) ([]Schedule, error) {
+	rows, err := q.db.Query(ctx, getSchedulesByUserWithPagination, arg.UserID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}

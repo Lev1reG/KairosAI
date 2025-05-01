@@ -8,6 +8,7 @@ import (
 	"github.com/Lev1reG/kairosai-backend/db"
 	"github.com/Lev1reG/kairosai-backend/pkg/logger"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
@@ -147,4 +148,32 @@ func (s *ScheduleService) CountSchedulesByUser(ctx context.Context, userID strin
 	}
 
 	return count, nil
+}
+
+func (s *ScheduleService) GetScheduleDetail(ctx context.Context, userID string, scheduleID string) (*db.Schedule, error) {
+	queries := db.New(s.db)
+
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return nil, errors.New("Invalid user id format")
+	}
+
+	scheduleUUID, err := uuid.Parse(scheduleID)
+	if err != nil {
+		return nil, errors.New("Invalid schedule id format")
+	}
+
+	schedule, err := queries.GetScheduleByI(ctx, db.GetScheduleByIParams{
+		ID:     pgtype.UUID{Bytes: scheduleUUID, Valid: true},
+		UserID: pgtype.UUID{Bytes: userUUID, Valid: true},
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, nil
+		}
+		logger.Log.Error("Failed to get schedule detail", zap.Error(err))
+		return nil, err
+	}
+
+	return &schedule, nil
 }

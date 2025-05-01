@@ -90,6 +90,33 @@ func (q *Queries) CreateSchedule(ctx context.Context, arg CreateScheduleParams) 
 	return i, err
 }
 
+const getScheduleByI = `-- name: GetScheduleByI :one
+SELECT id, user_id, title, description, start_time, end_time, status, created_at, updated_at FROM schedules
+WHERE id = $1 AND user_id = $2
+`
+
+type GetScheduleByIParams struct {
+	ID     pgtype.UUID `json:"id"`
+	UserID pgtype.UUID `json:"user_id"`
+}
+
+func (q *Queries) GetScheduleByI(ctx context.Context, arg GetScheduleByIParams) (Schedule, error) {
+	row := q.db.QueryRow(ctx, getScheduleByI, arg.ID, arg.UserID)
+	var i Schedule
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Title,
+		&i.Description,
+		&i.StartTime,
+		&i.EndTime,
+		&i.Status,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const getScheduleByID = `-- name: GetScheduleByID :one
 SELECT id, user_id, title, description, start_time, end_time, status, created_at, updated_at FROM schedules
 WHERE id = $1 AND user_id = $2

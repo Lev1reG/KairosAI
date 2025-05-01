@@ -9,6 +9,7 @@ import (
 	"github.com/Lev1reG/kairosai-backend/internal/validator"
 	"github.com/Lev1reG/kairosai-backend/pkg/logger"
 	"github.com/Lev1reG/kairosai-backend/pkg/utils"
+	"github.com/go-chi/chi/v5"
 	"go.uber.org/zap"
 )
 
@@ -94,4 +95,31 @@ func (h *ScheduleHandler) GetAllSchedules(w http.ResponseWriter, r *http.Request
 	}
 
 	utils.SuccessPaginatedResponse(w, http.StatusOK, "Schedules retrieved successfully", schedules, meta)
+}
+
+func (h *ScheduleHandler) GetScheduleDetail(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok || userID == "" {
+		utils.ErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	scheduleID := chi.URLParam(r, "id")
+	if scheduleID == "" {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Schedule ID is required")
+		return
+	}
+
+	schedule, err := h.scheduleService.GetScheduleDetail(r.Context(), userID, scheduleID)
+	if err != nil {
+		utils.ErrorResponse(w, http.StatusInternalServerError, "Failed to get schedule detail: "+err.Error())
+		return
+	}
+
+	if schedule == nil {
+		utils.ErrorResponse(w, http.StatusNotFound, "Schedule not found")
+		return
+	}
+
+	utils.SuccessResponse(w, http.StatusOK, "Schedule retrieved successfully", schedule)
 }

@@ -57,6 +57,9 @@ func scheduleRoutes(scheduleHandler *ScheduleHandler) http.Handler {
 	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
 		middlewares.JWTMiddleware(http.HandlerFunc(scheduleHandler.GetAllSchedules)).ServeHTTP(w, r)
 	})
+	r.Get("/{id}", func(w http.ResponseWriter, r *http.Request) {
+		middlewares.JWTMiddleware(http.HandlerFunc(scheduleHandler.GetScheduleDetail)).ServeHTTP(w, r)
+	})
 	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
 		middlewares.JWTMiddleware(http.HandlerFunc(scheduleHandler.CreateSchedules)).ServeHTTP(w, r)
 	})

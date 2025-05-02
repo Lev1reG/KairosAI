@@ -1,17 +1,18 @@
-FROM node:20-alpine
+FROM node:20-alpine AS BASE
 
 WORKDIR /app
 
-COPY package.json .
+FROM base AS deps
+COPY package.json package-lock.json ./
+RUN npm ci
 
-RUN npm install
-
-RUN npm i -g serve
-
+FROM base as builder
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
 RUN npm run build
 
-EXPOSE 3000
+FROM nginx:1.25-alpine AS final
+COPY --from=builder /app/dist /usr/share/nginx/html
 
-CMD [ "serve", "-s", "dist" ]
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

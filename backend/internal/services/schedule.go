@@ -27,6 +27,13 @@ type CreateScheduleInput struct {
 	UserID      string
 }
 
+type UpdateScheduleInput struct {
+	Title       string     `json:"title,omitempty" validate:"omitempty,min=3,max=100"`
+	Description *string    `json:"description,omitempty" validate:"omitempty,max=500"`
+	StartTime   *time.Time `json:"start_time,omitempty"`
+	EndTime     *time.Time `json:"end_time,omitempty"`
+}
+
 func toTimestamptz(t time.Time) pgtype.Timestamptz {
 	return pgtype.Timestamptz{
 		Time:  t,
@@ -34,11 +41,78 @@ func toTimestamptz(t time.Time) pgtype.Timestamptz {
 	}
 }
 
+func toNullText(ptr *string) pgtype.Text {
+	if ptr == nil {
+		return pgtype.Text{Valid: false}
+	}
+	return pgtype.Text{String: *ptr, Valid: true}
+}
+
+func toNullTimestamptz(t *time.Time) pgtype.Timestamptz {
+	if t == nil {
+		return pgtype.Timestamptz{Valid: false}
+	}
+	return pgtype.Timestamptz{Time: *t, Valid: true}
+}
+
 func NewScheduleService(db *pgxpool.Pool, jwtSecret string) *ScheduleService {
 	return &ScheduleService{
 		db:        db,
 		jwtSecret: jwtSecret,
 	}
+}
+
+func (s *ScheduleService) UpdateScheduleByID(ctx context.Context, userID, scheduleID string, input UpdateScheduleInput) error {
+	queries := db.New(s.db)
+
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return errors.New("Invalid user ID format")
+	}
+	scheduleUUID, err := uuid.Parse(scheduleID)
+	if err != nil {
+		return errors.New("Invalid schedule ID format")
+	}
+
+	_, err = queries.GetNonCanceledSchedulesByID(ctx, db.GetNonCanceledSchedulesByIDParams{
+		ID:     pgtype.UUID{Bytes: scheduleUUID, Valid: true},
+		UserID: pgtype.UUID{Bytes: userUUID, Valid: true},
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return errors.New("Schedule not found")
+		}
+	}
+
+	params := db.UpdateScheduleByIDParams{
+		Title:       input.Title,
+		Description: toNullText(input.Description),
+		StartTime:   toNullTimestamptz(input.StartTime),
+		EndTime:     toNullTimestamptz(input.EndTime),
+		ID:          pgtype.UUID{Bytes: scheduleUUID, Valid: true},
+		UserID:      pgtype.UUID{Bytes: userUUID, Valid: true},
+	}
+
+	conflict, err := queries.CheckScheduleConflict(ctx, db.CheckScheduleConflictParams{
+		UserID:  params.UserID,
+		Column2: params.StartTime,
+		Column3: params.EndTime,
+	})
+	if err != nil {
+		logger.Log.Error("Failed to check schedule conflict", zap.Error(err))
+		return err
+	}
+	if conflict {
+		return errors.New("You already have a schedule in this time range")
+	}
+
+	err = queries.UpdateScheduleByID(ctx, params)
+	if err != nil {
+		logger.Log.Error("Failed to update schedule", zap.Error(err))
+		return err
+	}
+
+	return nil
 }
 
 func (s *ScheduleService) CancelScheduleByID(ctx context.Context, userID string, scheduleID string) error {

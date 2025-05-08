@@ -238,3 +238,34 @@ func (q *Queries) SoftDeleteScheduleByID(ctx context.Context, arg SoftDeleteSche
 	_, err := q.db.Exec(ctx, softDeleteScheduleByID, arg.ID, arg.UserID)
 	return err
 }
+
+const updateScheduleByID = `-- name: UpdateScheduleByID :exec
+UPDATE schedules
+SET
+  title = COALESCE($1, title),
+  description = COALESCE($2, description),
+  start_time = COALESCE($3, start_time),
+  end_time = COALESCE($4, end_time)
+WHERE id = $5 AND user_id = $6
+`
+
+type UpdateScheduleByIDParams struct {
+	Title       string             `json:"title"`
+	Description pgtype.Text        `json:"description"`
+	StartTime   pgtype.Timestamptz `json:"start_time"`
+	EndTime     pgtype.Timestamptz `json:"end_time"`
+	ID          pgtype.UUID        `json:"id"`
+	UserID      pgtype.UUID        `json:"user_id"`
+}
+
+func (q *Queries) UpdateScheduleByID(ctx context.Context, arg UpdateScheduleByIDParams) error {
+	_, err := q.db.Exec(ctx, updateScheduleByID,
+		arg.Title,
+		arg.Description,
+		arg.StartTime,
+		arg.EndTime,
+		arg.ID,
+		arg.UserID,
+	)
+	return err
+}

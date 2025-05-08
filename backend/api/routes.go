@@ -66,6 +66,9 @@ func scheduleRoutes(scheduleHandler *ScheduleHandler) http.Handler {
 	r.Delete("/{id}/cancel", func(w http.ResponseWriter, r *http.Request) {
 		middlewares.JWTMiddleware(http.HandlerFunc(scheduleHandler.CancelSchedule)).ServeHTTP(w, r)
 	})
+	r.Patch("/{id}", func(w http.ResponseWriter, r *http.Request) {
+		middlewares.JWTMiddleware(http.HandlerFunc(scheduleHandler.UpdateSchedule)).ServeHTTP(w, r)
+	})
 
 	return r
 }

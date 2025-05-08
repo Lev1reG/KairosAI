@@ -36,6 +36,43 @@ func NewScheduleHandler(scheduleService *services.ScheduleService) *ScheduleHand
 	}
 }
 
+func (h *ScheduleHandler) UpdateSchedule(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok || userID == "" {
+		utils.ErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	scheduleID := chi.URLParam(r, "id")
+	if scheduleID == "" {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Schedule ID is required")
+		return
+	}
+
+	var input services.UpdateScheduleInput
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Invalid request body")
+		return
+	}
+
+	if err := validator.Validate.Struct(input); err != nil {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Validation failed: "+validator.ValidationFailed(err))
+		return
+	}
+
+	err := h.scheduleService.UpdateScheduleByID(r.Context(), userID, scheduleID, input)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			utils.ErrorResponse(w, http.StatusNotFound, "Schedule not found")
+			return
+		}
+		utils.ErrorResponse(w, http.StatusInternalServerError, "Failed to update schedule: "+err.Error())
+		return
+	}
+
+	utils.SuccessResponse(w, http.StatusOK, "Schedule updated successfully", nil)
+}
+
 func (h *ScheduleHandler) CancelSchedule(w http.ResponseWriter, r *http.Request) {
 	userID, ok := r.Context().Value(middlewares.UserIDKey).(string)
 	if !ok || userID == "" {

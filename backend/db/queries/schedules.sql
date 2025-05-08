@@ -46,3 +46,12 @@ WHERE id = $1 AND user_id = $2 AND status != 'canceled';
 -- name: GetNonCanceledSchedulesByID :one
 SELECT * FROM schedules
 WHERE id = $1 AND user_id = $2 AND status != 'canceled';
+
+-- name: UpdateScheduleByID :exec
+UPDATE schedules
+SET
+  title = COALESCE($1, title),
+  description = COALESCE($2, description),
+  start_time = COALESCE($3, start_time),
+  end_time = COALESCE($4, end_time)
+WHERE id = $5 AND user_id = $6;

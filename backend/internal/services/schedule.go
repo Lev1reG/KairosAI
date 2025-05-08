@@ -54,7 +54,7 @@ func (s *ScheduleService) CancelScheduleByID(ctx context.Context, userID string,
 		return errors.New("Invalid schedule ID format")
 	}
 
-	_, err = queries.GetScheduleByID(ctx, db.GetScheduleByIDParams{
+	_, err = queries.GetNonCanceledSchedulesByID(ctx, db.GetNonCanceledSchedulesByIDParams{
 		ID:     pgtype.UUID{Bytes: scheduleUUID, Valid: true},
 		UserID: pgtype.UUID{Bytes: userUUID, Valid: true},
 	})

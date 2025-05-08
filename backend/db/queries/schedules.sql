@@ -42,3 +42,7 @@ WHERE user_id = $1;
 UPDATE schedules
 SET status = 'canceled'
 WHERE id = $1 AND user_id = $2 AND status != 'canceled';
+
+-- name: GetNonCanceledSchedulesByID :one
+SELECT * FROM schedules
+WHERE id = $1 AND user_id = $2 AND status != 'canceled';

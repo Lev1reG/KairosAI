@@ -41,6 +41,41 @@ func NewScheduleService(db *pgxpool.Pool, jwtSecret string) *ScheduleService {
 	}
 }
 
+func (s *ScheduleService) CancelScheduleByID(ctx context.Context, userID string, scheduleID string) error {
+	queries := db.New(s.db)
+
+	userUUID, err := uuid.Parse(userID)
+	if err != nil {
+		return errors.New("Invalid user ID format")
+	}
+
+	scheduleUUID, err := uuid.Parse(scheduleID)
+	if err != nil {
+		return errors.New("Invalid schedule ID format")
+	}
+
+	_, err = queries.GetScheduleByID(ctx, db.GetScheduleByIDParams{
+		ID:     pgtype.UUID{Bytes: scheduleUUID, Valid: true},
+		UserID: pgtype.UUID{Bytes: userUUID, Valid: true},
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return errors.New("Schedule not found")
+		}
+		return err
+	}
+
+	err = queries.SoftDeleteScheduleByID(ctx, db.SoftDeleteScheduleByIDParams{
+		ID:     pgtype.UUID{Bytes: scheduleUUID, Valid: true},
+		UserID: pgtype.UUID{Bytes: userUUID, Valid: true},
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (s *ScheduleService) CreateSchedule(ctx context.Context, input CreateScheduleInput) (*db.Schedule, error) {
 	queries := db.New(s.db)
 

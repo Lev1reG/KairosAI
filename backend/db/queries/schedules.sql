@@ -37,3 +37,8 @@ LIMIT $2 OFFSET $3;
 -- name: CountSchedulesByUser :one
 SELECT COUNT(*) FROM schedules
 WHERE user_id = $1;
+
+-- name: SoftDeleteScheduleByID :exec
+UPDATE schedules
+SET status = 'canceled'
+WHERE id = $1 AND user_id = $2 AND status != 'canceled';

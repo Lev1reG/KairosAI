@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 
 	"github.com/Lev1reG/kairosai-backend/api/middlewares"
 	"github.com/Lev1reG/kairosai-backend/internal/services"
@@ -33,6 +34,32 @@ func NewScheduleHandler(scheduleService *services.ScheduleService) *ScheduleHand
 	return &ScheduleHandler{
 		scheduleService: scheduleService,
 	}
+}
+
+func (h *ScheduleHandler) CancelSchedule(w http.ResponseWriter, r *http.Request) {
+	userID, ok := r.Context().Value(middlewares.UserIDKey).(string)
+	if !ok || userID == "" {
+		utils.ErrorResponse(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
+	scheduleID := chi.URLParam(r, "id")
+	if scheduleID == "" {
+		utils.ErrorResponse(w, http.StatusBadRequest, "Schedule ID is required")
+		return
+	}
+
+	err := h.scheduleService.CancelScheduleByID(r.Context(), userID, scheduleID)
+	if err != nil {
+		if strings.Contains(err.Error(), "not found") {
+			utils.ErrorResponse(w, http.StatusNotFound, "Schedule not found or already canceled")
+			return
+		}
+		utils.ErrorResponse(w, http.StatusInternalServerError, "Failed to cancel schedule")
+		return
+	}
+
+	utils.SuccessResponse(w, http.StatusOK, "Schedule canceled successfully", nil)
 }
 
 func (h *ScheduleHandler) CreateSchedules(w http.ResponseWriter, r *http.Request) {
@@ -112,7 +139,7 @@ func (h *ScheduleHandler) GetScheduleDetail(w http.ResponseWriter, r *http.Reque
 
 	schedule, err := h.scheduleService.GetScheduleDetail(r.Context(), userID, scheduleID)
 	if err != nil {
-		utils.ErrorResponse(w, http.StatusInternalServerError, "Failed to get schedule detail: "+err.Error())
+		utils.ErrorResponse(w, http.StatusInternalServerError, "Failed to get schedule detail: s"+err.Error())
 		return
 	}
 

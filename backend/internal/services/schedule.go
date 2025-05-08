@@ -163,7 +163,7 @@ func (s *ScheduleService) GetScheduleDetail(ctx context.Context, userID string, 
 		return nil, errors.New("Invalid schedule id format")
 	}
 
-	schedule, err := queries.GetScheduleByI(ctx, db.GetScheduleByIParams{
+	schedule, err := queries.GetScheduleByID(ctx, db.GetScheduleByIDParams{
 		ID:     pgtype.UUID{Bytes: scheduleUUID, Valid: true},
 		UserID: pgtype.UUID{Bytes: userUUID, Valid: true},
 	})

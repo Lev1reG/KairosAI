@@ -15,6 +15,7 @@ entities:
   - description
   - start_time
   - end_time
+  - time
 
 slots:
   title:
@@ -36,7 +37,7 @@ slots:
     influence_conversation: true
     mappings:
       - type: from_entity
-        entity: start_time
+        entity: time
 
   end_time:
     type: text

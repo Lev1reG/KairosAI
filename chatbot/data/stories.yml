@@ -35,4 +35,3 @@ stories:
   - action: utter_greet
   - intent: create_schedule
   - action: action_create_schedule
-  - action: utter_schedule_created

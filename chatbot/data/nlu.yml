@@ -112,4 +112,7 @@ nlu:
     - tambahkan event "sprint desain" pada hari Kamis jam 1 siang
     - rencanakan kunjungan ke dokter hari Selasa depan jam 10
     - buat jadwal presentasi hari Rabu depan jam 9 pagi
+    - create a [meeting with John](title) [tomorrow at 5 PM](time) about [project review](description)
+    - schedule a [call with the client](title) [next Friday at 10 AM](time) to [discuss contract](description)
+    - add [marketing review](title) [on Tuesday at 3pm](time) for [ad campaign planning](description)
 

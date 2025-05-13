@@ -43,3 +43,5 @@ htmlcov/
 *.bak
 *.tmp
 
+# Local Rasa venv folder
+rasavenv/

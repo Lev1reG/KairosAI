@@ -90,26 +90,29 @@ nlu:
     - am I talking to a bot?
     - am I talking to a human?
 
-- intent: create_schedule
+- intent: add_schedule
   examples: |
-    - create a meeting for tomorrow at 5 PM
-    - schedule a call with John next Monday at 10 am
-    - book a dentist appointment for next Friday at 3pm
-    - set a reminder to water plants this Saturday at 8 am
-    - make a lunch appointment on Wednesday at 12
-    - organize a Zoom call with team at 9am tomorrow
-    - I want to add a new schedule for a conference on 20th May at 2pm
-    - schedule "design sprint" meeting on Thursday at 1 PM
-    - plan my doctor's appointment next Tuesday at 10
-    - add event called "presentation" next Wednesday at 9 am
-    - buat jadwal rapat untuk besok jam 5 sore
-    - jadwalkan panggilan dengan John hari Senin depan jam 10 pagi
-    - buat janji dokter gigi hari Jumat depan jam 3 sore
-    - setel pengingat untuk menyiram tanaman hari Sabtu jam 8 pagi
-    - atur jadwal makan siang hari Rabu jam 12 siang
-    - buat jadwal meeting Zoom dengan tim besok jam 9 pagi
-    - saya ingin menambahkan jadwal baru untuk konferensi tanggal 20 Mei jam 2 siang
-    - tambahkan event "sprint desain" pada hari Kamis jam 1 siang
-    - rencanakan kunjungan ke dokter hari Selasa depan jam 10
-    - buat jadwal presentasi hari Rabu depan jam 9 pagi
+    - Add an event to my calendar
+    - Schedule a meeting with [John](event-title) on [Friday at 3 PM](date-time)
+    - I want to add [design review](event-title) for [tomorrow 10am](date-time)
+    - Can you put [team sync](event-title) on my calendar [next Monday](date-time)
 
+- intent: view_schedule
+  examples: |
+    - What is on my calendar?
+    - Show my schedule
+    - Do I have any events today?
+    - View my appointments
+
+- intent: delete_schedule
+  examples: |
+    - Delete the [project meeting](event-title)
+    - Remove [lunch with Sarah](event-title)
+    - Can you delete [budget review](event-title)
+
+- intent: update_schedule
+  examples: |
+    - Reschedule [meeting with Anna](event-title) to [next Tuesday at 3 PM](new-date-time)
+    - Change [design review](event-title) to [Friday at 1pm](new-date-time)
+    - Move [project discussion](event-title) to [tomorrow 10 AM](new-date-time)
+    - Update [lunch with Sarah](event-title) to [Monday noon](new-date-time)

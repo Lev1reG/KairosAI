@@ -8,35 +8,39 @@ intents:
   - mood_great
   - mood_unhappy
   - bot_challenge
-  - create_schedule
+  - event-title
+  - add_schedule
+  - view_schedule
+  - delete_schedule
+  - update_schedule
+  - new-date-time
 
 entities:
-  - title
-  - description
-  - start_time
-  - end_time
-  - time
+  - event-title
+  - date-time
+  - new-date-time
 
 slots:
-  title:
+  event-title:
     type: text
-    influence_conversation: true
+    influence_conversation: false
     mappings:
       - type: from_entity
-        entity: title
+        entity: event-title
 
-  description:
+  date-time:
     type: text
-    influence_conversation: true
+    influence_conversation: false
     mappings:
       - type: from_entity
-        entity: description
+        entity: date-time
 
-  start_time:
+  new-date-time:
     type: text
-    influence_conversation: true
+    influence_conversation: false
     mappings:
       - type: from_entity
+<<<<<<< HEAD
         entity: time
 
   end_time:
@@ -45,10 +49,23 @@ slots:
     mappings:
       - type: from_entity
         entity: end_time
+=======
+        entity: new-date-time
+>>>>>>> 873dec185ff84df7bd29c76fcc68abf3d4905130
 
 responses:
   utter_greet:
     - text: "Hey! How are you?"
+
+  utter_cheer_up:
+    - text: "Here is something to cheer you up:"
+      image: "https://i.imgur.com/nGF1K8f.jpg"
+
+  utter_did_that_help:
+    - text: "Did that help you?"
+
+  utter_happy:
+    - text: "Great, carry on!"
 
   utter_goodbye:
     - text: "Bye"
@@ -56,20 +73,23 @@ responses:
   utter_iamabot:
     - text: "I am a bot, powered by Rasa."
 
-  utter_happy:
-    - text: "Great to hear that! How can I help you?"
-  
-  utter_cheer_up:
-    - text: "Cheer up! I am here to help you."
-  
-  utter_did_that_help:
-    - text: "Did that help you?"
+  utter_add_schedule:
+    - text: "Got it! I’ve added \"{event-title}\" to your calendar for {date-time}."
 
-  utter_schedule_created:
-    - text: "✅ Schedule '{title}' created for {start_time}"
+  utter_view_schedule:
+    - text: "Here is your schedule: Design Review on Thursday at 10 AM."
+
+  utter_delete_schedule:
+    - text: "The event \"{event-title}\" has been deleted."
+
+  utter_update_schedule:
+    - text: "Got it! \"{event-title}\" has been updated to {new-date-time}."
 
 actions:
-  - action_create_schedule
+  - action_add_schedule
+  - action_view_schedule
+  - action_delete_schedule
+  - action_update_schedule
 
 session_config:
   session_expiration_time: 60

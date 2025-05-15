@@ -12,7 +12,22 @@ rules:
   - intent: bot_challenge
   - action: utter_iamabot
 
-- rule: create schedule
-  steps: 
-  - intent: create_schedule
-  - action: action_create_schedule
+- rule: Handle AddSchedule
+  steps:
+    - intent: add_schedule
+    - action: utter_add_schedule
+
+- rule: Handle ViewSchedule
+  steps:
+    - intent: view_schedule
+    - action: utter_view_schedule
+
+- rule: Handle DeleteSchedule
+  steps:
+    - intent: delete_schedule
+    - action: utter_delete_schedule
+
+- rule: Handle UpdateSchedule
+  steps:
+    - intent: update_schedule
+    - action: utter_update_schedule

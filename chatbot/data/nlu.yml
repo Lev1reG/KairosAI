@@ -90,7 +90,7 @@ nlu:
     - am I talking to a bot?
     - am I talking to a human?
 
-- intent: create_schedule
+- intent: add_schedule
   examples: |
     - create a meeting for tomorrow at 5 PM
     - schedule a call with John next Monday at 10 am
@@ -115,4 +115,28 @@ nlu:
     - create a [meeting with John](title) [tomorrow at 5 PM](time) about [project review](description)
     - schedule a [call with the client](title) [next Friday at 10 AM](time) to [discuss contract](description)
     - add [marketing review](title) [on Tuesday at 3pm](time) for [ad campaign planning](description)
+    - Add an event to my calendar
+    - Schedule a meeting with [John](event-title) on [Friday at 3 PM](date-time)
+    - I want to add [design review](event-title) for [tomorrow 10am](date-time)
+    - Can you put [team sync](event-title) on my calendar [next Monday](date-time)
 
+
+- intent: view_schedule
+  examples: |
+    - What is on my calendar?
+    - Show my schedule
+    - Do I have any events today?
+    - View my appointments
+
+- intent: delete_schedule
+  examples: |
+    - Delete the [project meeting](event-title)
+    - Remove [lunch with Sarah](event-title)
+    - Can you delete [budget review](event-title)
+
+- intent: update_schedule
+  examples: |
+    - Reschedule [meeting with Anna](event-title) to [next Tuesday at 3 PM](new-date-time)
+    - Change [design review](event-title) to [Friday at 1pm](new-date-time)
+    - Move [project discussion](event-title) to [tomorrow 10 AM](new-date-time)
+    - Update [lunch with Sarah](event-title) to [Monday noon](new-date-time)

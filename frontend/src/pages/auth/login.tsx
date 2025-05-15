@@ -14,12 +14,11 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { useLogin } from "@/hooks/use-auth";
+import { Link, useNavigate } from "react-router-dom";
 import GoogleLoginButton from "@/components/auth/google-login-button";
 
 const LoginPage = () => {
-  const loginMutation = useLogin();
+  const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -29,9 +28,18 @@ const LoginPage = () => {
     },
   });
 
+  // Fake login logic
   const onSubmit = (data: z.infer<typeof LoginSchema>) => {
-    loginMutation.mutate(data);
+    const { email, password } = data;
+    if (email === "test@mail.com" && password === "Testing123") {
+      localStorage.setItem("auth", "true");
+      navigate("/register");
+    } else {
+      alert("Invalid credentials!\nTry:\nEmail: demo@gmail.com\nPassword: 1234");
+    }
+ 
   };
+  
 
   return (
     <section className="w-full min-h-screen flex justify-center items-center bg-background-custom">
@@ -88,11 +96,10 @@ const LoginPage = () => {
                   variant="submit"
                   type="submit"
                   className="w-full"
-                  disabled={loginMutation.isPending}
                 >
-                  {loginMutation.isPending ? "Loading..." : "Login"}
+                  Login
                 </Button>
-                <GoogleLoginButton />   
+                <GoogleLoginButton />
               </div>
             </form>
           </Form>

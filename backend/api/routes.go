@@ -23,9 +23,6 @@ func SetupRoutes(handlers *Handlers) *chi.Mux {
 		}
 	})
 
-	r.Mount("/api/auth", authRoutes(handlers.AuthHandler))
-	//r.Post("/webhook", DialogflowHandler)
-	return r
 }
 
 func authRoutes(authHandler *AuthHandler) http.Handler {

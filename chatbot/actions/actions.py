@@ -39,6 +39,7 @@ class ActionCreateSchedule(Action):
         print("title:", title)
         print("description:", description)
         print("start_time:", start_time_raw)
+        print("End time:", end_time)
 
         try: 
             response = requests.post("http://localhost:8080/schedule", json=payload)

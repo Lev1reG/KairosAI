@@ -8,7 +8,8 @@ import (
 )
 
 type Handlers struct {
-	AuthHandler *AuthHandler
+	AuthHandler     *AuthHandler
+	ScheduleHandler *ScheduleHandler
 	// Add more handlers here (e.g., UserHandler, ScheduleHandler)
 }
 
@@ -23,6 +24,11 @@ func SetupRoutes(handlers *Handlers) *chi.Mux {
 		}
 	})
 
+	// tambahkan ini dari branch teman
+	r.Mount("/api/auth", authRoutes(handlers.AuthHandler))
+	r.Mount("/api/schedules", scheduleRoutes(handlers.ScheduleHandler))
+
+	return r
 }
 
 func authRoutes(authHandler *AuthHandler) http.Handler {
@@ -38,11 +44,32 @@ func authRoutes(authHandler *AuthHandler) http.Handler {
 	r.Post("/resend-verification", authHandler.ResendVerificationEmail)
 	r.Post("/verify-email", authHandler.VerifyEmail)
 	r.Post("/forgot-password", authHandler.RequestResetPassword)
-  r.Post("/reset-password", authHandler.ResetPassword)
+	r.Post("/reset-password", authHandler.ResetPassword)
 
 	r.Route("/oauth", func(r chi.Router) {
 		r.Get("/{provider}/login", authHandler.RedirectToOAuthProvider)
 		r.Get("/{provider}/callback", authHandler.OAuthLogin)
 	})
+	return r
+}
+
+func scheduleRoutes(scheduleHandler *ScheduleHandler) http.Handler {
+	r := chi.NewRouter()
+	r.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		middlewares.JWTMiddleware(http.HandlerFunc(scheduleHandler.GetAllSchedules)).ServeHTTP(w, r)
+	})
+	r.Get("/{id}", func(w http.ResponseWriter, r *http.Request) {
+		middlewares.JWTMiddleware(http.HandlerFunc(scheduleHandler.GetScheduleDetail)).ServeHTTP(w, r)
+	})
+	r.Post("/", func(w http.ResponseWriter, r *http.Request) {
+		middlewares.JWTMiddleware(http.HandlerFunc(scheduleHandler.CreateSchedules)).ServeHTTP(w, r)
+	})
+	r.Delete("/{id}/cancel", func(w http.ResponseWriter, r *http.Request) {
+		middlewares.JWTMiddleware(http.HandlerFunc(scheduleHandler.CancelSchedule)).ServeHTTP(w, r)
+	})
+	r.Patch("/{id}", func(w http.ResponseWriter, r *http.Request) {
+		middlewares.JWTMiddleware(http.HandlerFunc(scheduleHandler.UpdateSchedule)).ServeHTTP(w, r)
+	})
+
 	return r
 }

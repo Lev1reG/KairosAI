@@ -49,42 +49,48 @@ export default function Sidebar() {
             <p className="text-sm text-muted-foreground">Loading...</p>
           )}
 
-          {Object.entries(groupedSchedules).map(([date, items]) => (
-            <div key={date}>
-              <p className="text-sm text-muted-foreground font-semibold mb-1">
-                {format(new Date(date), "dd MMM yyyy")}
-              </p>
-              <ul className="space-y-1">
-                {items.map((item, i) => (
-                  <li
-                    key={item.id ?? i}
-                    className="text-sm flex flex-col gap-0.5"
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="truncate font-medium">
-                        {item.title || "(untitled)"}
-                      </span>
-                      <span
-                        className={`text-xs font-semibold rounded px-2 py-0.5 ${
-                          item.status === "scheduled"
-                            ? "bg-blue-100 text-blue-800"
-                            : item.status === "completed"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
-                      >
-                        {item.status}
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">
-                      {format(parseISO(item.start_time), "HH:mm")} -{" "}
-                      {format(parseISO(item.end_time), "HH:mm")}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+          {Object.keys(groupedSchedules).length === 0 ? (
+            <p className="text-sm text-muted-foreground italic">
+              No schedules available
+            </p>
+          ) : (
+            Object.entries(groupedSchedules).map(([date, items]) => (
+              <div key={date}>
+                <p className="text-sm text-muted-foreground font-semibold mb-1">
+                  {format(new Date(date), "dd MMM yyyy")}
+                </p>
+                <ul className="space-y-1">
+                  {items.map((item, i) => (
+                    <li
+                      key={item.id ?? i}
+                      className="text-sm flex flex-col gap-0.5"
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="truncate font-medium">
+                          {item.title || "(untitled)"}
+                        </span>
+                        <span
+                          className={`text-xs font-semibold rounded px-2 py-0.5 ${
+                            item.status === "scheduled"
+                              ? "bg-blue-100 text-blue-800"
+                              : item.status === "completed"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {item.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {format(parseISO(item.start_time), "HH:mm")} -{" "}
+                        {format(parseISO(item.end_time), "HH:mm")}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          )}
 
           {hasNextPage && (
             <Button

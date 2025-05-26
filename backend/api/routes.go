@@ -4,7 +4,9 @@ import (
 	"net/http"
 
 	"github.com/Lev1reG/kairosai-backend/api/middlewares"
+	"github.com/Lev1reG/kairosai-backend/config"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 )
 
 type Handlers struct {
@@ -15,6 +17,21 @@ type Handlers struct {
 
 func SetupRoutes(handlers *Handlers) *chi.Mux {
 	r := chi.NewRouter()
+	cfg := config.LoadConfig()
+
+	var allowedOrigins []string
+	switch cfg.APP_ENV {
+	case "development":
+		allowedOrigins = []string{"http://localhost:5173"}
+	default:
+		allowedOrigins = []string{"https://domain.com"}
+	}
+
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   allowedOrigins,
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowCredentials: true,
+	}))
 
 	r.Use(middlewares.LoggingMiddleware)
 

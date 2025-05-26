@@ -1,6 +1,6 @@
-import { getSchedule } from "@/api/schedule";
+import { getSchedule, getScheduleDetailed } from "@/api/schedule";
 import { Schedule } from "@/types/schedule";
-import { useInfiniteQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 
 const LIMIT = 5;
 
@@ -19,5 +19,13 @@ export const useSchedule = () => {
       if (lastPage.length < LIMIT) return undefined;
       return allPages.length * LIMIT;
     },
+  });
+};
+
+export const useScheduleDetail = (id?: string) => {
+  return useQuery({
+    queryKey: ["schedule", id],
+    queryFn: () => getScheduleDetailed(id!),
+    enabled: !!id,
   });
 };

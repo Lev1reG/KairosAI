@@ -10,8 +10,8 @@ import { useLogout } from "@/hooks/use-auth";
 
 const Navbar = () => {
   const location = useLocation();
+  const { isAuthenticated, user } = useAuthStore();
 
-  const { isAuthenticated } = useAuthStore();
   const logoutMutation = useLogout();
 
   const resolveVariant = (path: string) => {
@@ -28,13 +28,16 @@ const Navbar = () => {
           <NavigationMenuList className="gap-8">
             <NavigationMenuItem>
               {isAuthenticated ? (
-                <Button
-                  onClick={() => logoutMutation.mutate()}
-                  variant={resolveVariant("/")}
-                  size="lg"
-                >
-                  Logout
-                </Button>
+                <div className="flex items-center gap-4">
+                  <p className="font-semibold text-lg">{user?.name || ""}</p>
+                  <Button
+                    onClick={() => logoutMutation.mutate()}
+                    variant={resolveVariant("/")}
+                    size="lg"
+                  >
+                    Logout
+                  </Button>
+                </div>
               ) : (
                 <Link to="/auth/login">
                   <Button variant={resolveVariant("/auth/login")} size="lg">

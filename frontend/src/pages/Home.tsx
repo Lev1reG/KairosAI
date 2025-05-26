@@ -1,3 +1,4 @@
+import Sidebar from "@/components/sidebar";
 import { useCurrentUser } from "@/hooks/use-auth";
 
 const Home = () => {
@@ -9,6 +10,7 @@ const Home = () => {
 
   return (
     <div>
+      <Sidebar />
       <pre>{JSON.stringify(user, null, 2)}</pre>
     </div>
   );

@@ -204,10 +204,14 @@ export const useCurrentUser = () => {
   useEffect(() => {
     if (query.isSuccess && query.data) {
       setUser(query.data?.data ?? null);
-    } else if (query.isError) {
+    }
+  }, [query.isSuccess, query.data, setUser]);
+
+  useEffect(() => {
+    if (query.isError) {
       logout();
     }
-  }, [query.isSuccess, query.isError, query.data, setUser, logout]);
+  }, [query.isError, logout]);
 
   return query;
 };
@@ -227,7 +231,7 @@ export const useLogout = () => {
     onSuccess: () => {
       toast.success("Logged out successfully!", { id: "logoutToast" });
 
-      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      queryClient.removeQueries();
 
       navigate("/auth/login", { replace: true });
     },

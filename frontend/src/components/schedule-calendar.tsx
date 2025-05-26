@@ -85,7 +85,7 @@ export default function ScheduleCalendar() {
           {!isDetailLoading && scheduleDetail && (
             <div className="text-sm space-y-2">
               <p>
-                <strong>Waktu:</strong>{" "}
+                <strong>Time:</strong>{" "}
                 {format(
                   parseISO(scheduleDetail?.data?.start_time || ""),
                   "dd MMM yyyy HH:mm"
@@ -93,11 +93,11 @@ export default function ScheduleCalendar() {
                 -{" "}
                 {format(
                   parseISO(scheduleDetail?.data?.end_time || ""),
-                  "HH:mm"
+                  "dd MMM yyyy HH:mm"
                 )}
               </p>
               <p>
-                <strong>Deskripsi:</strong>{" "}
+                <strong>Description:</strong>{" "}
                 {scheduleDetail?.data?.description || "-"}
               </p>
             </div>

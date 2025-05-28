@@ -25,22 +25,24 @@ func main() {
 	}
 	defer database.Close()
 
-  err = db.RunMigrations(cfg)
-  if err != nil {
-    logger.Log.Fatal("Migration failed", zap.Error(err))
-    return
-  }
-  logger.Log.Info("Migrations applied successfully")
+	err = db.RunMigrations(cfg)
+	if err != nil {
+		logger.Log.Fatal("Migration failed", zap.Error(err))
+		return
+	}
+	logger.Log.Info("Migrations applied successfully")
 
-  authService := services.NewAuthService(database, cfg.JWT_SECRET)
+	authService := services.NewAuthService(database, cfg.JWT_SECRET)
+	scheduleService := services.NewScheduleService(database, cfg.JWT_SECRET)
 
-  handlers := &api.Handlers{
-    AuthHandler: api.NewAuthHandler(authService),
-  }
+	handlers := &api.Handlers{
+		AuthHandler:     api.NewAuthHandler(authService),
+		ScheduleHandler: api.NewScheduleHandler(scheduleService),
+	}
 
-  utils.InitOAuth(cfg)
+	utils.InitOAuth(cfg)
 
-  r := api.SetupRoutes(handlers)
+	r := api.SetupRoutes(handlers)
 
 	port := cfg.PORT
 	logger.Log.Info("Server running", zap.String("port", port))

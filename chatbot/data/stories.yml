@@ -1,0 +1,44 @@
+version: "3.1"
+
+stories:
+
+- story: happy path
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: mood_great
+  - action: utter_happy
+
+- story: sad path 1
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: mood_unhappy
+  - action: utter_cheer_up
+  - action: utter_did_that_help
+  - intent: affirm
+  - action: utter_happy
+
+- story: sad path 2
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: mood_unhappy
+  - action: utter_cheer_up
+  - action: utter_did_that_help
+  - intent: deny
+  - action: utter_goodbye
+
+- story: Schedule flow
+  steps:
+<<<<<<< HEAD
+  - intent: greet
+  - action: utter_greet
+  - intent: create_schedule
+  - action: action_create_schedule
+=======
+    - intent: add_schedule
+    - action: utter_add_schedule
+    - intent: view_schedule
+    - action: utter_view_schedule
+>>>>>>> 873dec185ff84df7bd29c76fcc68abf3d4905130

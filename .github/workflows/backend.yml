@@ -45,9 +45,9 @@ jobs:
 
       - name: Run Tests
         run: go test ./... -cover -race
-  
+
   docker-build:
-    name: Build Docker Image
+    name: Build & Push Docker Image
     needs: test
     runs-on: ubuntu-latest
 
@@ -55,6 +55,18 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Build Image
-        run: docker build -t kairosai-backend .
+      - name: Log in to GitHub Container Registry
+        run: echo "${{ secrets.CR_PAT }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Set lowercase owner
+        id: vars
+        run: echo "owner_lc=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Docker Image
+        run: |
+          docker build -t ghcr.io/${{ steps.vars.outputs.owner_lc }}/kairosai-backend:latest .
         working-directory: backend
+
+      - name: Push Docker Image
+        run: |
+          docker push ghcr.io/${{ steps.vars.outputs.owner_lc }}/kairosai-backend:latest

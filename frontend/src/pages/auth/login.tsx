@@ -15,8 +15,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useLogin } from "@/hooks/use-auth";
 import GoogleLoginButton from "@/components/auth/google-login-button";
+import { useLogin } from "@/hooks/use-auth";
 
 const LoginPage = () => {
   const loginMutation = useLogin();
@@ -92,7 +92,7 @@ const LoginPage = () => {
                 >
                   {loginMutation.isPending ? "Loading..." : "Login"}
                 </Button>
-                <GoogleLoginButton />   
+                <GoogleLoginButton />
               </div>
             </form>
           </Form>

@@ -1,15 +1,17 @@
-import { useCurrentUser } from "@/hooks/use-auth";
+import ChatPage from "@/components/chat-page";
+import ScheduleCalendar from "@/components/schedule-calendar";
+import Sidebar from "@/components/sidebar";
+import { useToogleSidebarStore } from "@/stores/toogle-sidebar-store";
 
 const Home = () => {
-  const { data: user, isPending } = useCurrentUser();
-
-  if (isPending) {
-    return <div>Loading...</div>;
-  }
+  const { sidebarState } = useToogleSidebarStore();
 
   return (
-    <div>
-      <pre>{JSON.stringify(user, null, 2)}</pre>
+    <div className="w-full min-h-screen flex flex-row">
+      <Sidebar />
+      <div className="flex-1">
+        {sidebarState === "calendar" ? <ScheduleCalendar /> : <ChatPage />}
+      </div>
     </div>
   );
 };

@@ -1,0 +1,33 @@
+version: "3.1"
+
+rules:
+
+- rule: Say goodbye anytime the user says goodbye
+  steps:
+  - intent: goodbye
+  - action: utter_goodbye
+
+- rule: Say 'I am a bot' anytime the user challenges
+  steps:
+  - intent: bot_challenge
+  - action: utter_iamabot
+
+- rule: Handle AddSchedule
+  steps:
+    - intent: add_schedule
+    - action: utter_add_schedule
+
+- rule: Handle ViewSchedule
+  steps:
+    - intent: view_schedule
+    - action: utter_view_schedule
+
+- rule: Handle DeleteSchedule
+  steps:
+    - intent: delete_schedule
+    - action: utter_delete_schedule
+
+- rule: Handle UpdateSchedule
+  steps:
+    - intent: update_schedule
+    - action: utter_update_schedule

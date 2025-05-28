@@ -1,7 +1,7 @@
 import { Calendar, dateFnsLocalizer, Event } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { parse, format, startOfWeek, getDay } from "date-fns";
-import id from "date-fns/locale/id";
+import { id } from "date-fns/locale/id";
 import { useMemo, useState } from "react";
 import { useSchedule, useScheduleDetail } from "@/hooks/use-schedule";
 import { parseISO } from "date-fns";

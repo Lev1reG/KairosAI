@@ -27,13 +27,13 @@ const ChatPage = () => {
   return (
     <div
       className={cn(
-        "min-h-screen flex flex-col items-center",
+        "pl-[280px] min-h-screen flex flex-col items-center",
         messages.length === 0 ? "justify-center" : "justify-start"
       )}
     >
       <div
         className={cn(
-          "overflow-y-auto px-4 pt-6 pb-25 max-w-2xl mx-auto space-y-4",
+          "overflow-y-auto px-4 py-25 max-w-2xl mx-auto space-y-4",
           messages.length === 0 ? "hidden" : "block"
         )}
       >

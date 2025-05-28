@@ -28,7 +28,7 @@ export default function Sidebar() {
   }, [allSchedules]);
 
   return (
-    <div className="flex flex-col gap-10 px-4 py-6 w-[280px] bg-background border-r">
+    <div className="fixed flex flex-col gap-10 px-4 py-25 w-[280px] bg-background border-r">
       <h1 className="text-2xl font-bold text-center">KairosAI</h1>
 
       <Button

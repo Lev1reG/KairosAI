@@ -22,7 +22,7 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="bg-green-500 px-8 py-4">
+    <nav className="z-10 w-full fixed bg-green-500 px-8 py-4">
       <div className="container mx-auto flex justify-end items-center">
         <NavigationMenu>
           <NavigationMenuList className="gap-8">

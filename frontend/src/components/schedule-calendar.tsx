@@ -51,7 +51,7 @@ export default function ScheduleCalendar() {
   if (isLoading) return <div className="p-4">Loading calendar...</div>;
 
   return (
-    <div className="p-6 w-full">
+    <div className="pl-[280px] pr-6 py-25">
       <Calendar
         localizer={localizer}
         culture="id"

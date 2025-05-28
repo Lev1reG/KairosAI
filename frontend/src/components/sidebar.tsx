@@ -5,10 +5,13 @@ import { format, parseISO } from "date-fns";
 import { useMemo } from "react";
 import { useSchedule } from "@/hooks/use-schedule"; // adjust to your file
 import { Schedule } from "@/types/schedule";
+import { useToogleSidebarStore } from "@/stores/toogle-sidebar-store";
 
 export default function Sidebar() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
     useSchedule();
+
+  const { sidebarState, toggle } = useToogleSidebarStore();
 
   const allSchedules = useMemo(() => {
     return data?.pages.flat() ?? [];
@@ -29,10 +32,11 @@ export default function Sidebar() {
       <h1 className="text-2xl font-bold text-center">KairosAI</h1>
 
       <Button
+        onClick={toggle}
         variant="navbarActive"
-        className="font-semibold text-bold text-white"
+        className="font-semibold text-bold text-white cursor-pointer"
       >
-        Chat with Kairos
+        {sidebarState === "chat" ? "View Calendar" : "View Chat"}
       </Button>
 
       <div>

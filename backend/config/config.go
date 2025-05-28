@@ -10,7 +10,7 @@ import (
 type Config struct {
 	APP_ENV            string
 	APP_URL            string
-  FE_URL             string
+	FE_URL             string
 	PORT               string
 	DBHost             string
 	DBPort             string
@@ -23,7 +23,7 @@ type Config struct {
 	GoogleClientSecret string
 	GithubClientID     string
 	GithubClientSecret string
-  SendGridAPIKey     string
+	SendGridAPIKey     string
 	SMTPUsername       string
 	SMTPPassword       string
 	SMTPHost           string
@@ -31,15 +31,16 @@ type Config struct {
 }
 
 func LoadConfig() *Config {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	if os.Getenv("APP_ENV") != "production" {
+		if err := godotenv.Load(); err != nil {
+			log.Println("⚠️ .env not loaded; falling back to system env")
+		}
 	}
 
 	return &Config{
 		APP_ENV:            getEnv("APP_ENV", "development"),
 		APP_URL:            getEnv("APP_URL", "http://localhost:8080"),
-    FE_URL:             getEnv("FE_URL", "http://localhost:3000"),
+		FE_URL:             getEnv("FE_URL", "http://localhost:3000"),
 		PORT:               getEnv("PORT", "8080"),
 		DBHost:             getEnv("DB_HOST", "localhost"),
 		DBPort:             getEnv("DB_PORT", "5432"),
@@ -52,11 +53,11 @@ func LoadConfig() *Config {
 		GoogleClientSecret: getEnv("GOOGLE_CLIENT_SECRET", "google_client_secret"),
 		GithubClientID:     getEnv("GITHUB_CLIENT_ID", "github_client_id"),
 		GithubClientSecret: getEnv("GITHUB_CLIENT_SECRET", "github_client_secret"),
-    SendGridAPIKey:     getEnv("SENDGRID_API_KEY", "sendgrid_api_key"),
+		SendGridAPIKey:     getEnv("SENDGRID_API_KEY", "sendgrid_api_key"),
 		SMTPUsername:       getEnv("SMTP_USERNAME", "smtp_username"),
 		SMTPPassword:       getEnv("SMTP_PASSWORD", "smtp_password"),
-    SMTPHost:           getEnv("SMTP_HOST", "smtp_host"),
-    SMTPPort:           getEnv("SMTP_PORT", "smtp_port"),
+		SMTPHost:           getEnv("SMTP_HOST", "smtp_host"),
+		SMTPPort:           getEnv("SMTP_PORT", "smtp_port"),
 	}
 }
 

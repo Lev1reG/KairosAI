@@ -1,18 +1,23 @@
-FROM node:20-alpine AS BASE
+# Step 1: Build the app using Node
+FROM node:22-alpine AS builder
 
 WORKDIR /app
-
-FROM base AS deps
-COPY package.json package-lock.json ./
+COPY package*.json ./
 RUN npm ci
-
-FROM base as builder
-COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM nginx:1.25-alpine AS final
-COPY --from=builder /app/dist /usr/share/nginx/html
+# Step 2: Use a lightweight Nginx container to serve the files
+FROM nginx:alpine
 
-EXPOSE 80
+# Copy the built app from the builder stage
+COPY --from=builder /app/dist /var/www/html/
+
+# Copy the runtime injection script into the container
+COPY env.sh /docker-entrypoint.d/env.sh
+RUN dos2unix /docker-entrypoint.d/env.sh
+RUN chmod +x /docker-entrypoint.d/env.sh
+
+# Let Docker run your script before starting Nginx
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

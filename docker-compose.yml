@@ -13,8 +13,10 @@ services:
   frontend:
     image: ghcr.io/lev1reg/kairosai-frontend:latest
     container_name: kairosai-frontend
-    env_file:
-      - .env.frontend
+    environment:
+      ASSET_DIR: /var/www/html
+      APP_PREFIX: PREFIX_
+      PREFIX_API_URL: "http://localhost:8080/api"
     ports:
       - "${PORT:-3000}:3000"
     depends_on:

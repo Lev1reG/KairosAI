@@ -2,14 +2,14 @@ version: "3.1"
 
 stories:
 
-- story: happy path
+- story: happy path greeting
   steps:
   - intent: greet
   - action: utter_greet
   - intent: mood_great
   - action: utter_happy
 
-- story: sad path 1
+- story: unhappy path with recovery
   steps:
   - intent: greet
   - action: utter_greet
@@ -19,7 +19,7 @@ stories:
   - intent: affirm
   - action: utter_happy
 
-- story: sad path 2
+- story: unhappy path without recovery
   steps:
   - intent: greet
   - action: utter_greet
@@ -29,16 +29,91 @@ stories:
   - intent: deny
   - action: utter_goodbye
 
-- story: Schedule flow
+# - story: schedule creation flow
+#   steps:
+#   - intent: add_schedule
+#   - action: utter_ask_title
+#   - intent: inform_schedule
+#     entities:
+#       - title
+#   - action: utter_ask_description
+#   - intent: inform_schedule
+#     entities:
+#       - description
+#   - action: utter_ask_time
+#   - intent: inform_schedule
+#     entities:
+#       - time
+#   - slot_was_set:
+#       - title
+#       - description
+#       - time
+#   - action: action_create_schedule
+#   - action: utter_add_schedule
+
+# - story: schedule creation with minimal info
+#   steps:
+#   - intent: add_schedule
+#   - action: utter_ask_title
+#   - intent: inform_schedule
+#     entities:
+#       - title
+#       - time
+#   - slot_was_set:
+#       - title
+#       - time
+#   - action: action_create_schedule
+#   - action: utter_add_schedule
+
+- story: bot challenge response
   steps:
-<<<<<<< HEAD
-  - intent: greet
+  - intent: bot_challenge
+  - action: utter_iamabot
+
+- story: goodbye flow
+  steps:
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: schedule creation flow
+  steps:
   - action: utter_greet
-  - intent: create_schedule
+  - intent: add_schedule
+  - action: utter_ask_title
+  - intent: inform_schedule
+    entities:
+      - title
+  - action: utter_ask_description
+  - intent: inform_schedule
+    entities:
+      - description
+  # - action: utter_ask_time
+  # - intent: inform_schedule
+  #   entities:
+  #     - time
   - action: action_create_schedule
-=======
-    - intent: add_schedule
-    - action: utter_add_schedule
-    - intent: view_schedule
-    - action: utter_view_schedule
->>>>>>> 873dec185ff84df7bd29c76fcc68abf3d4905130
+  - action: utter_add_schedule 
+
+- story: view schedule
+  steps:
+  - action: utter_greet
+  - intent: view_schedule
+  - action: action_view_schedule
+
+
+# - story: schedule creation flow
+#   steps:
+#   - intent: add_schedule
+#   - action: utter_ask_title
+#   - intent: inform_schedule
+#     entities:
+#       - title
+#   - action: utter_ask_description
+#   - intent: inform_schedule
+#     entities:
+#       - description
+#   - action: utter_ask_time
+#   - intent: inform_schedule
+#     entities:
+#       - time
+#   - action: action_create_schedule

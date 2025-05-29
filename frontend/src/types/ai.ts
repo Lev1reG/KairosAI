@@ -15,6 +15,7 @@ export interface AiServerResponse {
 			title: string;
 			"date-time": { date_time: string }[];
 			description: string[];
+			id?: string;
 		};
 		fulfillmentText: string;
 		intent: {

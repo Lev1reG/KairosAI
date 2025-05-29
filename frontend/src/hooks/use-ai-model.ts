@@ -1,10 +1,12 @@
 import { chatToAI } from "@/api/schedule";
 import { queryClient } from "@/lib/query-client";
 import { useMutation } from "@tanstack/react-query";
-import { useCreateSchedule } from "./use-schedule";
+import { useCancelSchedule, useCreateSchedule } from "./use-schedule";
+import toast from "react-hot-toast";
 
 export const useAiModel = () => {
 	const createSchedule = useCreateSchedule();
+	const cancelSchedule = useCancelSchedule();
 
 	return useMutation({
 		mutationKey: ["chat"],
@@ -31,6 +33,20 @@ export const useAiModel = () => {
 						}
 					);
 					break;
+				case "delete-schedule": {
+					const scheduleId = data?.queryResult.parameters.id;
+
+					if (scheduleId) {
+						cancelSchedule.mutate(scheduleId, {
+							onSuccess: () => {
+								queryClient.invalidateQueries({ queryKey: ["schedule"] });
+							},
+						});
+					} else {
+						toast.error("No schedule ID provided by AI to cancel.");
+					}
+					break;
+				}
 			}
 		},
 	});

@@ -43,3 +43,14 @@ export const chatToAI = async (data: AiServerRequest) => {
 		handleApiError(error);
 	}
 };
+
+export const cancelSchedule = async (id: string) => {
+	try {
+		const response = await api.delete<ApiResponse<null>>(
+			`/schedules/${id}/cancel`
+		);
+		return response.data;
+	} catch (error: unknown) {
+		handleApiError(error);
+	}
+};

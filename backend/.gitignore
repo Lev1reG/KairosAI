@@ -23,6 +23,7 @@ Thumbs.db
 
 # Environment variables and secrets
 .env
+google-credentials.json
 config/config.go.bak
 
 # Database files (if any local db dumps exist)

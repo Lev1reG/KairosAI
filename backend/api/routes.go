@@ -41,6 +41,8 @@ func SetupRoutes(handlers *Handlers) *chi.Mux {
 		}
 	})
 
+	r.Post("/api/chat", HandleChatWithAI)
+
 	// tambahkan ini dari branch teman
 	r.Mount("/api/auth", authRoutes(handlers.AuthHandler))
 	r.Mount("/api/schedules", scheduleRoutes(handlers.ScheduleHandler))

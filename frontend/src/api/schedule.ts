@@ -1,8 +1,7 @@
 import { ApiResponse } from "@/types/api";
 import { api, handleApiError } from "./api";
-import { Schedule } from "@/types/schedule";
+import { CreateScheduleInput, Schedule } from "@/types/schedule";
 import { AiServerRequest, AiServerResponse } from "@/types/ai";
-import axios from "axios";
 
 export const getSchedule = async (limit: number = 10, offset: number) => {
 	try {
@@ -27,15 +26,18 @@ export const getScheduleDetailed = async (id: string) => {
 	}
 };
 
-export const chatToAI = async (data: AiServerRequest) => {
-	const AI_SERVER_URL = import.meta.env.VITE_AI_SERVER_URL;
+export const createSchedule = async (data: CreateScheduleInput) => {
 	try {
-		const response = await axios.post<AiServerResponse>(AI_SERVER_URL, data, {
-			headers: {
-				Authorization: `Bearer ${import.meta.env.VITE_AI_SERVER_TOKEN}`,
-				"Content-Type": "application/json",
-			},
-		});
+		const response = await api.post<ApiResponse<Schedule>>("/schedules", data);
+		return response.data;
+	} catch (error: unknown) {
+		handleApiError(error);
+	}
+};
+
+export const chatToAI = async (data: AiServerRequest) => {
+	try {
+		const response = await api.post<AiServerResponse>("/chat", data);
 		return response.data;
 	} catch (error: unknown) {
 		handleApiError(error);

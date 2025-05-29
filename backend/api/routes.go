@@ -30,7 +30,10 @@ func SetupRoutes(handlers *Handlers) *chi.Mux {
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   allowedOrigins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: true,
+		MaxAge:           300,
 	}))
 
 	r.Use(middlewares.LoggingMiddleware)

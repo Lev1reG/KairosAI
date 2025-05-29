@@ -15,9 +15,10 @@ func RunMigrations(cfg *config.Config) error {
 	databaseUrl := cfg.GetDBConnectionString()
 
 	migrationsPath, _ := filepath.Abs("db/migrations")
-
+	urlPath := "file://" + filepath.ToSlash(migrationsPath)
+	
 	m, err := migrate.New(
-		"file://"+migrationsPath,
+		urlPath,
 		databaseUrl,
 	)
 	if err != nil {

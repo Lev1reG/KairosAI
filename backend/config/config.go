@@ -1,10 +1,14 @@
 package config
 
 import (
+	"context"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 
 	"github.com/joho/godotenv"
+	"golang.org/x/oauth2/google"
 )
 
 type Config struct {
@@ -69,4 +73,27 @@ func getEnv(key, fallback string) string {
 
 func (cfg *Config) GetDBConnectionString() string {
 	return "postgres://" + cfg.DBUser + ":" + cfg.DBPassword + "@" + cfg.DBHost + ":" + cfg.DBPort + "/" + cfg.DBName + "?sslmode=" + cfg.DBSSLMode
+}
+
+func GetDialogflowAccessToken() (string, error) {
+	ctx := context.Background()
+
+		// Load your service account key JSON
+	data, err := ioutil.ReadFile("../google-credentials.json")
+	if err != nil {
+		return "", fmt.Errorf("failed to read credentials file: %w", err)
+	}
+
+		// Generate token
+	creds, err := google.CredentialsFromJSON(ctx, data, "https://www.googleapis.com/auth/dialogflow")
+	if err != nil {
+		return "", fmt.Errorf("failed to create credentials: %w", err)
+	}
+
+		token, err := creds.TokenSource.Token()
+	if err != nil {
+		return "", fmt.Errorf("failed to get token: %w", err)
+	}
+
+		return token.AccessToken, nil
 }

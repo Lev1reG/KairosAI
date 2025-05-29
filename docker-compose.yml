@@ -1,0 +1,55 @@
+services:
+  backend:
+    image: ghcr.io/lev1reg/kairosai-backend:latest
+    container_name: kairosai-backend
+    env_file:
+      - .env.backend
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    depends_on:
+      - db
+      - migrate
+
+  frontend:
+    image: ghcr.io/lev1reg/kairosai-frontend:latest
+    container_name: kairosai-frontend
+    environment:
+      ASSET_DIR: /var/www/html
+      APP_PREFIX: PREFIX_
+      PREFIX_API_URL: "http://localhost:8080/api"
+    ports:
+      - "${PORT:-3000}:3000"
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:15
+    container_name: kairosai-db
+    restart: always
+    environment:
+      POSTGRES_DB: kairosai
+      POSTGRES_USER: kairosai
+      POSTGRES_PASSWORD: secret
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  migrate:
+    image: migrate/migrate
+    depends_on:
+      - db
+    volumes:
+      - ./backend/db/migrations:/migrations
+    entrypoint:
+      [
+        "migrate",
+        "-path",
+        "/migrations",
+        "-database",
+        "postgres://kairosai:secret@db:5432/kairosai?sslmode=disable",
+        "up",
+      ]
+
+volumes:
+  pgdata:

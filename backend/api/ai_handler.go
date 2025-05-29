@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/Lev1reG/kairosai-backend/pkg/logger"
+	"go.uber.org/zap"
 	"golang.org/x/oauth2/google"
 )
 
@@ -32,7 +34,9 @@ func HandleChatWithAI(w http.ResponseWriter, r *http.Request) {
 	defer resp.Body.Close()
 
 	w.WriteHeader(resp.StatusCode)
-	io.Copy(w, resp.Body)
+	if _, err := io.Copy(w, resp.Body); err != nil {
+		logger.Log.Error("failed to copy response body", zap.Error(err))
+	}
 }
 
 func GetDialogflowAccessToken() (string, error) {

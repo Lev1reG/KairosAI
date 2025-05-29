@@ -40,6 +40,8 @@ Thumbs.db
 *.cover
 coverage.xml
 htmlcov/
+python-3.9.0.exe
+
 
 # Backup or temp files
 *.bak

@@ -8,89 +8,91 @@ intents:
   - mood_great
   - mood_unhappy
   - bot_challenge
-  - event-title
   - add_schedule
+  - inform_schedule
   - view_schedule
   - delete_schedule
   - update_schedule
-  - new-date-time
 
 entities:
-  - event-title
-  - date-time
-  - new-date-time
+  - title
+  - description
+  - time
 
 slots:
-  event-title:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: from_entity
-        entity: event-title
-
-  date-time:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: from_entity
-        entity: date-time
-
-  new-date-time:
-    type: text
-    influence_conversation: false
-    mappings:
-      - type: from_entity
-<<<<<<< HEAD
-        entity: time
-
-  end_time:
+  title:
     type: text
     influence_conversation: true
     mappings:
       - type: from_entity
-        entity: end_time
-=======
-        entity: new-date-time
->>>>>>> 873dec185ff84df7bd29c76fcc68abf3d4905130
+        entity: title
+      - type: from_text
+
+  description:
+    type: text
+    influence_conversation: false
+    mappings:
+      - type: from_entity
+        entity: description
+      - type: from_text
+
+  time:
+    type: text
+    influence_conversation: true
+    mappings:
+      - type: from_entity
+        entity: time
 
 responses:
   utter_greet:
-    - text: "Hey! How are you?"
+    - text: "Hey! What can I do for you today?"
 
-  utter_cheer_up:
-    - text: "Here is something to cheer you up:"
-      image: "https://i.imgur.com/nGF1K8f.jpg"
-
-  utter_did_that_help:
-    - text: "Did that help you?"
+  utter_goodbye:
+    - text: "Bye!"
 
   utter_happy:
     - text: "Great, carry on!"
 
-  utter_goodbye:
-    - text: "Bye"
+  utter_cheer_up:
+    - text: "Here is something to cheer you up! 😊"
+
+  utter_did_that_help:
+    - text: "Did that help you?"
 
   utter_iamabot:
     - text: "I am a bot, powered by Rasa."
 
+  utter_ask_title:
+    - text: "What's the title of your event?"
+
+  utter_ask_description:
+    - text: "Could you describe the event?"
+
+  utter_ask_time:
+    - text: "When should this event take place?"
+
   utter_add_schedule:
-    - text: "Got it! I’ve added \"{event-title}\" to your calendar for {date-time}."
+    - text: "Got it! I've added '{title}' to your calendar for {time}."
 
   utter_view_schedule:
-    - text: "Here is your schedule: Design Review on Thursday at 10 AM."
+    - text: "Here's your current schedule."
 
   utter_delete_schedule:
-    - text: "The event \"{event-title}\" has been deleted."
+    - text: "The event '{title}' has been deleted."
 
   utter_update_schedule:
-    - text: "Got it! \"{event-title}\" has been updated to {new-date-time}."
+    - text: "Got it! '{title}' has been updated to {time}."
+
+forms:
+  schedule_form:
+    required_slots:
+        - title
+        - description
+        - time
 
 actions:
-  - action_add_schedule
+  - action_create_schedule
   - action_view_schedule
   - action_delete_schedule
   - action_update_schedule
 
-session_config:
-  session_expiration_time: 60
-  carry_over_slots_to_new_session: true

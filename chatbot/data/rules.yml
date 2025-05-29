@@ -1,33 +1,62 @@
+# version: "3.1"
+
+# rules:
+# - rule: Say goodbye anytime the user says goodbye
+#   steps:
+#   - intent: goodbye
+#   - action: utter_goodbye
+
+# - rule: Say 'I am a bot' anytime the user challenges
+#   steps:
+#   - intent: bot_challenge
+#   - action: utter_iamabot
+
+# - rule: Start schedule form
+#   steps:
+#   - intent: add_schedule
+#   - action: utter_ask_title
+#   - active_loop: null 
+
+# - rule: Handle ViewSchedule
+#   steps:
+#   - intent: view_schedule
+#   - action: action_view_schedule
+
+
 version: "3.1"
 
 rules:
+- rule: Greet the user
+  steps:
+  - intent: greet
+  - action: utter_greet
 
-- rule: Say goodbye anytime the user says goodbye
+- rule: Say goodbye anytime
   steps:
   - intent: goodbye
   - action: utter_goodbye
 
-- rule: Say 'I am a bot' anytime the user challenges
+- rule: Respond to bot challenge
   steps:
   - intent: bot_challenge
   - action: utter_iamabot
 
-- rule: Handle AddSchedule
+- rule: Initiate schedule creation
   steps:
-    - intent: add_schedule
-    - action: utter_add_schedule
+  - intent: add_schedule
+  - action: action_create_schedule
 
-- rule: Handle ViewSchedule
+- rule: Handle immediate schedule view
   steps:
-    - intent: view_schedule
-    - action: utter_view_schedule
+  - intent: view_schedule
+  - action: action_view_schedule
 
 - rule: Handle DeleteSchedule
   steps:
-    - intent: delete_schedule
-    - action: utter_delete_schedule
+  - intent: delete_schedule
+  - action: action_delete_schedule
 
 - rule: Handle UpdateSchedule
   steps:
-    - intent: update_schedule
-    - action: utter_update_schedule
+  - intent: update_schedule
+  - action: action_update_schedule

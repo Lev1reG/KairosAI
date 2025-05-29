@@ -25,12 +25,14 @@ func main() {
 	}
 	defer database.Close()
 
-	err = db.RunMigrations(cfg)
-	if err != nil {
-		logger.Log.Fatal("Migration failed", zap.Error(err))
-		return
+	if cfg.APP_ENV == "development" {
+		err = db.RunMigrations(cfg)
+		if err != nil {
+			logger.Log.Fatal("Migration failed", zap.Error(err))
+			return
+		}
+		logger.Log.Info("Migrations applied successfully")
 	}
-	logger.Log.Info("Migrations applied successfully")
 
 	authService := services.NewAuthService(database, cfg.JWT_SECRET)
 	scheduleService := services.NewScheduleService(database, cfg.JWT_SECRET)

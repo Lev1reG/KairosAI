@@ -1,4 +1,5 @@
 import {
+	cancelSchedule,
 	createSchedule,
 	getSchedule,
 	getScheduleDetailed,
@@ -44,6 +45,19 @@ export const useCreateSchedule = () => {
 		},
 		onError: () => {
 			toast.error("You already have a schedule for this time!");
+		},
+	});
+};
+
+export const useCancelSchedule = () => {
+	return useMutation({
+		mutationKey: ["cancel-schedule"],
+		mutationFn: (id: string) => cancelSchedule(id),
+		onSuccess: () => {
+			toast.success("Schedule cancelled successfully!");
+		},
+		onError: () => {
+			toast.error("Failed to cancel schedule. Please try again.");
 		},
 	});
 };

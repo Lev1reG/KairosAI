@@ -24,7 +24,7 @@ func SetupRoutes(handlers *Handlers) *chi.Mux {
 	case "development":
 		allowedOrigins = []string{"http://localhost:5173"}
 	default:
-		allowedOrigins = []string{"https://kairosai-frontend.calmsmoke-9e8d24e5.southeastasia.azurecontainerapps.io"}
+		allowedOrigins = []string{"https://kairos-ai-tau.vercel.app"}
 	}
 
 	r.Use(cors.Handler(cors.Options{
